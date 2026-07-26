@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Form Jadwal Musik | GKMI Yesus Raja</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <!-- Select2 CSS & Bootstrap 4 Theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
+  <!-- Summernote WYSIWYG CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
+  <!-- AdminLTE 3 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+
+  <style>
+    .back-to-top {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      z-index: 1050;
+      display: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      line-height: 30px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    .back-to-top:hover {
+      transform: translateY(-3px);
+    }
+    .note-editable p, .song-lirik-view p {
+      margin-bottom: 2px !important;
+      line-height: 1.4 !important;
+    }
+  </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+    </ul>
+    <ul class="navbar-nav ml-auto">
+    </ul>
+  </nav>
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a href="index.html" class="brand-link">
+      <i class="fas fa-church brand-image img-circle elevation-3 p-2 bg-primary text-white" style="opacity: .8"></i>
+      <span class="brand-text font-weight-light">GKMI Yesus Raja</span>
+    </a>
+    <div class="sidebar">
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-header">MENU UTAMA</li>
+          <li class="nav-item">
+            <a href="index.html" class="nav-link active">
+              <i class="nav-icon fas fa-calendar-alt"></i>
+              <p>Jadwal Musik</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <section class="content pt-3">
+      <div class="container-fluid">
+
+        <!-- Form Card -->
+        <div class="card card-primary card-outline">
+          <div class="card-header">
+            <h3 class="card-title" id="formTitle"><i class="fas fa-calendar-plus mr-2"></i>Tambah Jadwal Musik</h3>
+            <div class="card-tools">
+              <a href="index.html" class="btn btn-secondary btn-sm" data-toggle="tooltip" title="Kembali ke Daftar Jadwal">
+                <i class="fas fa-arrow-left"></i>
+              </a>
+            </div>
+          </div>
+
+          <form id="formJadwal" novalidate>
+            <div class="card-body">
+              <input type="hidden" id="jadwalId">
+
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="tanggalWaktu">Tanggal <span class="text-danger">*</span></label>
+                  <input type="date" class="form-control" id="tanggalWaktu">
+                  <div class="invalid-feedback" id="err-tanggalWaktu" style="display:none;">* Tanggal wajib diisi</div>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="sesiIbadah">Sesi Ibadah <span class="text-danger">*</span></label>
+                  <select class="form-control select2" id="sesiIbadah" style="width: 100%;">
+                    <option value="">Pilih Sesi Ibadah</option>
+                    <option value="Ibadah Raya 1 (Pagi)">Ibadah Raya 1 (Pagi)</option>
+                    <option value="Ibadah Raya 2 (Sore)">Ibadah Raya 2 (Sore)</option>
+                    <option value="Ibadah Pengerja">Ibadah Pengerja</option>
+                    <option value="Ibadah Pemuda / Remaja">Ibadah Pemuda / Remaja</option>
+                    <option value="Ibadah Sekolah Minggu">Ibadah Sekolah Minggu</option>
+                    <option value="Ibadah Khusus">Ibadah Khusus</option>
+                  </select>
+                  <small class="text-danger font-weight-bold" id="err-sesiIbadah" style="display:none; font-size: 80%;">* Sesi Ibadah wajib dipilih</small>
+                </div>
+              </div>
+
+              <hr>
+              <h6 class="font-weight-bold text-secondary mb-3">Tim Vocal</h6>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="worshipLeader">Worship Leader (WL) <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="worshipLeader" placeholder="Nama WL">
+                  <div class="invalid-feedback" id="err-worshipLeader" style="display:none;">* Worship Leader wajib diisi</div>
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="singers">Singer(s) <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="singers" placeholder="Contoh: Ani, Budi, Cici">
+                  <div class="invalid-feedback" id="err-singers" style="display:none;">* Singer(s) wajib diisi</div>
+                </div>
+              </div>
+
+              <hr>
+              <h6 class="font-weight-bold text-secondary mb-3">Tim Pemain Musik (Musisi)</h6>
+              <div class="form-row">
+                <div class="form-group col-md-4">
+                  <label for="keyboardist">Keyboard</label>
+                  <input type="text" class="form-control" id="keyboardist" placeholder="Nama Pemain Keyboard">
+                </div>
+                <div class="form-group col-md-4">
+                  <label for="guitarist">Gitaris</label>
+                  <input type="text" class="form-control" id="guitarist" placeholder="Nama Pemain Gitar">
+                </div>
+                <div class="form-group col-md-4">
+                  <label for="bassist">Bassist</label>
+                  <input type="text" class="form-control" id="bassist" placeholder="Nama Pemain Bass">
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label for="drummer">Drummer</label>
+                  <input type="text" class="form-control" id="drummer" placeholder="Nama Drummer">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="soundman">Multimedia <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="soundman" placeholder="Nama Operator">
+                  <div class="invalid-feedback" id="err-soundman" style="display:none;">* Multimedia wajib diisi</div>
+                </div>
+              </div>
+
+              <hr>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="font-weight-bold text-secondary mb-0">Daftar Lagu Ibadah</h6>
+                <button type="button" class="btn btn-outline-primary btn-sm" id="btnAddSong" onclick="addSongItem()" data-toggle="tooltip" title="Tambah Lagu Baru">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+
+              <div id="songsContainer">
+                <!-- Dynamic song cards generated via JS -->
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <button type="submit" class="btn btn-primary float-right" data-toggle="tooltip" title="Simpan Data Jadwal">
+                <i class="fas fa-save"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer class="main-footer text-sm">
+    <div class="float-right d-none d-sm-inline">
+      Aplikasi Manajemen Gereja v1.0
+    </div>
+    <strong>&copy; 2026 GKMI Yesus Raja.</strong> All rights reserved.
+  </footer>
+
+  <!-- Floating Back to Top Button -->
+  <a id="btnBackToTop" href="#" class="btn btn-primary back-to-top" role="button" aria-label="Ke Atas" data-toggle="tooltip" title="Kembali Ke Atas">
+    <i class="fas fa-chevron-up"></i>
+  </a>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap 4 Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<!-- Summernote WYSIWYG JS -->
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
+<!-- AdminLTE App -->
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+<script>
+  const STORAGE_KEY = 'church_music_schedules_v1';
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true
+  });
+
+  // Get data from localStorage
+  function getSchedules() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  // Save data array to localStorage
+  function saveSchedules(schedules) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules));
+  }
+
+  // Helper escape HTML
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // Auto format chorus (Orange Peel #ff9900) dan verse (Yellow #ffff00) + Bold + Pascal Case
+  function autoHighlightLyricsKeywords($note) {
+    const editor = $note.next('.note-editor').find('.note-editable');
+    if (!editor.length) return;
+
+    editor.find('p, div, li').each(function() {
+      let html = $(this).html();
+      if (!html) return;
+
+      let text = $(this).text().trim();
+      if (!text) return;
+
+      let newHtml = html;
+
+      // Replace chorus/reff (case-insensitive) -> Orange Peel (#ff9900)
+      newHtml = newHtml.replace(/(^|>|&nbsp;|\s)(chorus|reff)((?:&nbsp;|\s)*\d+)?(?=(?:&nbsp;|\s|:|\.||<|$)+)(?![a-z])/gi, function(fullMatch, prefix, word, num) {
+        if (fullMatch.includes('data-auto-keyword')) return fullMatch;
+        let pascalWord = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        let digits = num ? num.replace(/[^0-9]/g, '') : '';
+        let numberSuffix = digits ? ' ' + digits : '';
+        return `${prefix}<span data-auto-keyword="true" style="color: #ff9900; font-weight: bold;">${pascalWord}${numberSuffix}</span>`;
+      });
+
+      // Replace verse (case-insensitive) -> Yellow (#ffff00)
+      newHtml = newHtml.replace(/(^|>|&nbsp;|\s)(verse)((?:&nbsp;|\s)*\d+)?(?=(?:&nbsp;|\s|:|\.||<|$)+)(?![a-z])/gi, function(fullMatch, prefix, word, num) {
+        if (fullMatch.includes('data-auto-keyword')) return fullMatch;
+        let pascalWord = word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        let digits = num ? num.replace(/[^0-9]/g, '') : '';
+        let numberSuffix = digits ? ' ' + digits : '';
+        return `${prefix}<span data-auto-keyword="true" style="color: #ffff00; font-weight: bold;">${pascalWord}${numberSuffix}</span>`;
+      });
+
+      if (newHtml !== html) {
+        $(this).html(newHtml);
+      }
+    });
+  }
+
+  // Dynamic Song Item Functions
+  function addSongItem(data = {}) {
+    if ($('.song-item').length >= 10) {
+      Toast.fire({ icon: 'warning', title: 'Maksimal 10 lagu untuk 1 jadwal ibadah!' });
+      return;
+    }
+
+    const id = 'song_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+    const html = `
+      <div class="card card-outline card-secondary mb-3 song-item" id="${id}">
+        <div class="card-header bg-light">
+          <h3 class="card-title text-primary font-weight-bold" style="font-size:1rem;"><i class="fas fa-music mr-1"></i> <span class="song-title-label">Lagu #${$('.song-item').length + 1}</span></h3>
+          <div class="card-tools">
+            <button type="button" class="btn btn-danger btn-xs btn-remove-song" onclick="removeSongItem('${id}')" data-toggle="tooltip" title="Hapus Lagu">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Judul Lagu <span class="text-danger">*</span></label>
+              <input type="text" class="form-control song-judul" value="${escapeHtml(data.judul || '')}" placeholder="Judul Lagu">
+              <div class="invalid-feedback err-song-judul" style="display:none;">* Judul lagu wajib diisi</div>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Penyanyi / Ciptaan</label>
+              <input type="text" class="form-control song-penyanyi" value="${escapeHtml(data.penyanyi || '')}" placeholder="Penyanyi / Pengarang (opsional)">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Link YouTube</label>
+              <input type="url" class="form-control song-youtube" value="${escapeHtml(data.youtube || '')}" placeholder="https://youtube.com/watch?v=... (opsional)">
+            </div>
+            <div class="form-group col-md-6">
+              <label>Catatan Lagu</label>
+              <input type="text" class="form-control song-catatan" value="${escapeHtml(data.catatan || '')}" placeholder="Kunci/Do=G, Tempo, dll (opsional)">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Lirik Lagu</label>
+            <textarea class="form-control song-lirik summernote">${data.lirik || ''}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+
+    $('#songsContainer').append(html);
+
+    // Initialize Summernote for this item
+    $(`#${id} .summernote`).summernote({
+      placeholder: 'Tulis atau paste lirik lagu di sini...\n(Ketik "chorus" atau "verse" lalu Enter untuk pewarnaan otomatis)',
+      tabsize: 2,
+      height: 140,
+      toolbar: [
+        ['style', ['bold', 'italic', 'underline', 'clear']],
+        ['color', ['color']],
+        ['para', ['ul', 'ol', 'paragraph']],
+        ['view', ['codeview']]
+      ],
+      callbacks: {
+        onKeyup: function(e) {
+          // Hanya ubah warna ketika tombol ENTER (key 13) ditekan
+          if (e.keyCode === 13) {
+            const $note = $(this);
+            autoHighlightLyricsKeywords($note);
+
+            setTimeout(() => {
+              const selection = window.getSelection();
+              if (selection && selection.rangeCount > 0) {
+                let node = selection.getRangeAt(0).startContainer;
+                if (node.nodeType === 3) node = node.parentNode;
+                const $p = $(node).closest('p, div, li');
+                if ($p.length && !$p.text().trim()) {
+                  $p.html('<br>');
+                }
+              }
+            }, 10);
+          }
+        },
+        onBlur: function() {
+          autoHighlightLyricsKeywords($(this));
+        }
+      }
+    });
+
+    // Realtime error reset on judul change
+    $(`#${id} .song-judul`).on('input change', function() {
+      if ($(this).val().trim()) {
+        $(this).removeClass('is-invalid');
+        $(this).next('.err-song-judul').hide();
+      }
+    });
+
+    updateSongNumbers();
+  }
+
+  function removeSongItem(id) {
+    if ($('.song-item').length <= 1) {
+      Toast.fire({ icon: 'warning', title: 'Minimal 1 lagu harus ada di daftar!' });
+      return;
+    }
+    // Destroy summernote before removing DOM
+    $(`#${id} .summernote`).summernote('destroy');
+    $(`#${id}`).remove();
+    updateSongNumbers();
+  }
+
+  function updateSongNumbers() {
+    const count = $('.song-item').length;
+    $('.song-item').each(function(index) {
+      $(this).find('.song-title-label').text(`Lagu #${index + 1}`);
+    });
+
+    if (count >= 10) {
+      $('#btnAddSong').prop('disabled', true).addClass('disabled');
+    } else {
+      $('#btnAddSong').prop('disabled', false).removeClass('disabled');
+    }
+
+    if (count <= 1) {
+      $('.btn-remove-song').prop('disabled', true).addClass('disabled');
+    } else {
+      $('.btn-remove-song').prop('disabled', false).removeClass('disabled');
+    }
+  }
+
+  $(document).ready(function() {
+    // Initialize Tooltips with hover trigger & auto cleanup
+    $('.tooltip').remove();
+    $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });
+
+    $(document).on('click mouseleave', '[data-toggle="tooltip"]', function() {
+      $(this).tooltip('hide');
+      $('.tooltip').remove();
+    });
+
+    // Floating Back to Top Scroll Logic
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 150) {
+        $('#btnBackToTop').fadeIn();
+      } else {
+        $('#btnBackToTop').fadeOut();
+      }
+    });
+
+    $('#btnBackToTop').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({ scrollTop: 0 }, 'fast');
+    });
+
+    // Initialize Select2
+    $('.select2').select2({
+      theme: 'bootstrap4',
+      placeholder: 'Pilih Sesi Ibadah',
+      allowClear: true
+    });
+
+    // Auto-focus ke kolom pencarian Select2 saat dropdown dibuka
+    $(document).on('select2:open', () => {
+      const searchInput = document.querySelector('.select2-container--open .select2-search__field');
+      if (searchInput) {
+        searchInput.focus();
+      }
+    });
+
+    // Check if editing (URL has ?id=xxx)
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('id');
+
+    if (editId) {
+      // Edit mode: load existing data
+      $('#formTitle').html('<i class="fas fa-edit mr-2"></i>Edit Jadwal Musik');
+      document.title = 'Edit Jadwal Musik | GKMI Yesus Raja';
+
+      const schedules = getSchedules();
+      const item = schedules.find(s => s.id === editId);
+
+      if (item) {
+        $('#jadwalId').val(item.id);
+        $('#tanggalWaktu').val(item.tanggalWaktu);
+        $('#sesiIbadah').val(item.sesiIbadah).trigger('change');
+        $('#worshipLeader').val(item.worshipLeader);
+        $('#singers').val(item.singers);
+        $('#keyboardist').val(item.keyboardist);
+        $('#guitarist').val(item.guitarist);
+        $('#bassist').val(item.bassist);
+        $('#drummer').val(item.drummer);
+        $('#soundman').val(item.soundman);
+
+        // Load songs
+        if (Array.isArray(item.daftarLagu) && item.daftarLagu.length > 0) {
+          item.daftarLagu.forEach(song => addSongItem(song));
+        } else if (typeof item.daftarLagu === 'string' && item.daftarLagu.trim()) {
+          addSongItem({ judul: 'Daftar Lagu', lirik: escapeHtml(item.daftarLagu).replace(/\n/g, '<br>') });
+        } else {
+          addSongItem();
+        }
+      } else {
+        Toast.fire({ icon: 'error', title: 'Data tidak ditemukan!' });
+        setTimeout(() => window.location.href = 'index.html', 1500);
+      }
+    } else {
+      // Create mode: Add 1 default song entry
+      addSongItem();
+    }
+
+    // Live validation error reset
+    $('#tanggalWaktu, #worshipLeader, #singers, #soundman').on('input change', function() {
+      if ($(this).val().trim()) {
+        $(this).removeClass('is-invalid');
+        $(this).next('.invalid-feedback').hide();
+      }
+    });
+
+    $('#sesiIbadah').on('change', function() {
+      if ($(this).val()) {
+        $(this).next('.select2-container').find('.select2-selection').removeClass('border border-danger');
+        $('#err-sesiIbadah').hide();
+      }
+    });
+
+    // Form submit
+    $('#formJadwal').on('submit', function(e) {
+      e.preventDefault();
+
+      // Reset validation states
+      $('.form-control').removeClass('is-invalid');
+      $('.invalid-feedback').hide();
+      $('#err-sesiIbadah').hide();
+      $('#sesiIbadah').next('.select2-container').find('.select2-selection').removeClass('border border-danger');
+
+      let isValid = true;
+
+      const tanggalWaktu = $('#tanggalWaktu').val();
+      if (!tanggalWaktu) {
+        $('#tanggalWaktu').addClass('is-invalid');
+        $('#err-tanggalWaktu').show();
+        isValid = false;
+      }
+
+      const sesiIbadah = $('#sesiIbadah').val();
+      if (!sesiIbadah) {
+        $('#sesiIbadah').next('.select2-container').find('.select2-selection').addClass('border border-danger');
+        $('#err-sesiIbadah').show();
+        isValid = false;
+      }
+
+      const worshipLeader = $('#worshipLeader').val();
+      if (!worshipLeader || !worshipLeader.trim()) {
+        $('#worshipLeader').addClass('is-invalid');
+        $('#err-worshipLeader').show();
+        isValid = false;
+      }
+
+      const singers = $('#singers').val();
+      if (!singers || !singers.trim()) {
+        $('#singers').addClass('is-invalid');
+        $('#err-singers').show();
+        isValid = false;
+      }
+
+      const soundman = $('#soundman').val();
+      if (!soundman || !soundman.trim()) {
+        $('#soundman').addClass('is-invalid');
+        $('#err-soundman').show();
+        isValid = false;
+      }
+
+      // Collect & validate songs
+      const songsList = [];
+      $('.song-item').each(function() {
+        const songLirikElem = $(this).find('.song-lirik');
+        autoHighlightLyricsKeywords(songLirikElem);
+
+        const judulEl = $(this).find('.song-judul');
+        const judulVal = judulEl.val().trim();
+
+        if (!judulVal) {
+          judulEl.addClass('is-invalid');
+          $(this).find('.err-song-judul').show();
+          isValid = false;
+        }
+
+        songsList.push({
+          judul: judulVal,
+          penyanyi: $(this).find('.song-penyanyi').val().trim(),
+          youtube: $(this).find('.song-youtube').val().trim(),
+          catatan: $(this).find('.song-catatan').val().trim(),
+          lirik: songLirikElem.summernote('code')
+        });
+      });
+
+      if (!isValid) {
+        return false;
+      }
+
+      const id = $('#jadwalId').val();
+      const schedules = getSchedules();
+
+      const payload = {
+        id: id ? id : 'jdw_' + Date.now(),
+        tanggalWaktu: $('#tanggalWaktu').val(),
+        sesiIbadah: $('#sesiIbadah').val(),
+        worshipLeader: $('#worshipLeader').val(),
+        singers: $('#singers').val(),
+        keyboardist: $('#keyboardist').val(),
+        guitarist: $('#guitarist').val(),
+        bassist: $('#bassist').val(),
+        drummer: $('#drummer').val(),
+        soundman: $('#soundman').val(),
+        daftarLagu: songsList
+      };
+
+      if (id) {
+        const index = schedules.findIndex(s => s.id === id);
+        if (index !== -1) schedules[index] = payload;
+        Toast.fire({ icon: 'success', title: 'Jadwal berhasil diperbarui!' });
+      } else {
+        schedules.push(payload);
+        Toast.fire({ icon: 'success', title: 'Jadwal baru berhasil ditambahkan!' });
+      }
+
+      saveSchedules(schedules);
+
+      // Sync with Google Sheet if configured
+      const gasUrl = localStorage.getItem('church_gas_web_app_url');
+      if (gasUrl) {
+        try {
+          fetch(gasUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'save', data: payload })
+          });
+        } catch(err) {
+          console.warn('Google Sheet save error:', err);
+        }
+      }
+
+      // Redirect back to index after short delay
+      setTimeout(() => window.location.href = 'index.html', 1500);
+    });
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jadwal Pelayanan Musik | Manajemen Gereja</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- DataTables CSS (Bootstrap 4) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
+  <!-- SweetAlert2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <!-- AdminLTE 3 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+
+  <style>
+    .badge-sesi {
+      font-size: 0.85rem;
+      padding: 0.35em 0.65em;
+    }
+    .pelayan-item {
+      margin-bottom: 2px;
+      display: inline-block;
+    }
+    .badge-role {
+      font-weight: 600;
+      min-width: 32px;
+      display: inline-block;
+      text-align: center;
+    }
+    .action-btn {
+      margin: 1px;
+    }
+    .back-to-top {
+      position: fixed;
+      bottom: 25px;
+      right: 25px;
+      z-index: 1050;
+      display: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      line-height: 30px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+    }
+    .back-to-top:hover {
+      transform: translateY(-3px);
+    }
+    .song-lirik-view p {
+      margin-bottom: 2px !important;
+      line-height: 1.4 !important;
+    }
+  </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <!-- Left navbar links -->
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto">
+    </ul>
+  </nav>
+  <!-- /.navbar -->
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="index.html" class="brand-link">
+      <i class="fas fa-church brand-image img-circle elevation-3 p-2 bg-primary text-white" style="opacity: .8"></i>
+      <span class="brand-text font-weight-light">GKMI Yesus Raja</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-header">MENU UTAMA</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link active">
+              <i class="nav-icon fas fa-calendar-alt"></i>
+              <p>Jadwal Musik</p>
+            </a>
+          </li>
+
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Main content -->
+    <section class="content pt-3">
+      <div class="container-fluid">
+
+
+        <!-- Main Card -->
+        <div class="card card-primary card-outline" id="mainTableCard">
+          <div class="card-header border-0">
+            <h3 class="card-title font-weight-bold d-flex align-items-center">
+              <span>Daftar Petugas Musik Ibadah</span>
+              <span id="syncStatus" class="ml-3 small text-muted font-weight-normal" style="display:none;"><i class="fas fa-sync-alt fa-spin text-primary mr-1"></i>Menyinkronkan...</span>
+            </h3>
+            <div class="card-tools">
+              <a href="form-jadwal.html" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Tambah Jadwal Baru">
+                <i class="fas fa-plus"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="tableJadwal" class="table table-bordered table-striped table-hover w-100">
+                <thead>
+                  <tr>
+                    <th style="width: 4%">No</th>
+                    <th style="width: 15%">Tanggal</th>
+                    <th style="width: 22%">Sesi Ibadah</th>
+                    <th style="width: 22%">WL & Singers</th>
+                    <th style="width: 11%">Tim Musik</th>
+                    <th style="width: 12%">Multimedia</th>
+                    <th style="width: 14%; white-space: nowrap;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyJadwal">
+                  <!-- Data rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer class="main-footer text-sm">
+    <div class="float-right d-none d-sm-inline">
+      Aplikasi Manajemen Gereja v1.0
+    </div>
+    <strong>&copy; 2026 GKMI Yesus Raja.</strong> All rights reserved.
+  </footer>
+
+  <!-- Floating Back to Top Button -->
+  <a id="btnBackToTop" href="#" class="btn btn-primary back-to-top" role="button" aria-label="Ke Atas" data-toggle="tooltip" title="Kembali Ke Atas">
+    <i class="fas fa-chevron-up"></i>
+  </a>
+</div>
+
+
+<!-- REQUIRED SCRIPTS -->
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap 4 Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables & Plugins -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap4.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- AdminLTE App -->
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+
+<!-- APPLICATION SCRIPT (LocalStorage & UI Logic) -->
+<script>
+  const STORAGE_KEY = 'church_music_schedules_v1';
+  let dataTableInstance = null;
+
+  // SweetAlert Toast Setup
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true
+  });
+
+  $(document).ready(function() {
+    // Floating Back to Top Scroll Logic
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 150) {
+        $('#btnBackToTop').fadeIn();
+      } else {
+        $('#btnBackToTop').fadeOut();
+      }
+    });
+
+    $('#btnBackToTop').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({ scrollTop: 0 }, 'fast');
+    });
+
+    // Initial render
+    renderApp();
+  });
+
+  // Google Apps Script Web App URL Configuration
+  const GAS_URL_KEY = 'church_gas_web_app_url';
+  function getGasUrl() {
+    return localStorage.getItem(GAS_URL_KEY) || '';
+  }
+  function setGasUrl(url) {
+    if (url) {
+      localStorage.setItem(GAS_URL_KEY, url.trim());
+    } else {
+      localStorage.removeItem(GAS_URL_KEY);
+    }
+  }
+
+  function configureGoogleSheet() {
+    const currentUrl = getGasUrl();
+    Swal.fire({
+      title: 'Integrasi Google Spreadsheet',
+      html: `
+        <p class="text-left text-muted small mb-2">Masukkan <strong>Web App URL</strong> dari Google Apps Script untuk menyinkronkan data jadwal dengan Google Sheet secara online.</p>
+        <input type="text" id="swalGasUrl" class="form-control" placeholder="https://script.google.com/macros/s/AKfycb.../exec" value="${escapeHtml(currentUrl)}">
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Simpan URL',
+      cancelButtonText: 'Batal',
+      showCloseButton: true,
+      allowOutsideClick: false,
+      didOpen: () => {
+        $('.swal2-close').attr('data-toggle', 'tooltip').attr('title', 'Tutup Detail').tooltip({ trigger: 'hover' });
+      },
+      preConfirm: () => {
+        return $('#swalGasUrl').val().trim();
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        setGasUrl(result.value);
+        if (result.value) {
+          Toast.fire({ icon: 'info', title: 'Menyinkronkan data dengan Google Sheet...' });
+          await renderApp();
+          Toast.fire({ icon: 'success', title: 'Terhubung dengan Google Spreadsheet!' });
+        } else {
+          Toast.fire({ icon: 'warning', title: 'URL dihapus. Menggunakan penyimpanan lokal.' });
+          renderApp();
+        }
+      }
+    });
+  }
+
+  // Get data from localStorage
+  function getSchedules() {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  }
+
+  // Save data array to localStorage
+  function saveSchedules(schedules) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(schedules));
+  }
+
+  // Get data from localStorage or Google Sheet
+  async function loadSchedulesFromBackend() {
+    const gasUrl = getGasUrl();
+    if (!gasUrl) {
+      return getSchedules();
+    }
+
+    try {
+      const res = await fetch(gasUrl);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          saveSchedules(data);
+          return data;
+        }
+      }
+    } catch (err) {
+      console.warn('Gagal memuat dari Google Sheet, menggunakan LocalStorage:', err);
+    }
+    return getSchedules();
+  }
+
+  // Helper to render table rows
+  function renderTableRows(schedules) {
+    if (!schedules) schedules = [];
+    
+    // Sort schedules by date ascending
+    schedules.sort((a, b) => new Date(a.tanggalWaktu) - new Date(b.tanggalWaktu));
+
+    // Destroy DataTable if initialized
+    if (dataTableInstance) {
+      dataTableInstance.destroy();
+    }
+
+    const tbody = $('#tbodyJadwal');
+    tbody.empty();
+
+    schedules.forEach((item, index) => {
+      // Format Date: "Minggu, 27/07/2026"
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      let formattedDate = item.tanggalWaktu;
+      if (item.tanggalWaktu) {
+        const dateParts = item.tanggalWaktu.split('T')[0].split('-');
+        if (dateParts.length === 3) {
+          const dateObj = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+          const dayName = days[dateObj.getDay()];
+          const dd = String(dateObj.getDate()).padStart(2, '0');
+          const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+          const yyyy = dateObj.getFullYear();
+          formattedDate = `${dayName}, ${dd}/${mm}/${yyyy}`;
+        }
+      }
+
+      // Helper formatting for table row columns
+      let wlSingersText = escapeHtml(item.worshipLeader || '-');
+      if (item.singers && item.singers.trim()) {
+        let singerList = item.singers.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        if (singerList.length > 0) {
+          wlSingersText += ` & ${singerList.length} singer`;
+        }
+      }
+
+      let musisiList = [];
+      if (item.keyboardist && item.keyboardist.trim() && item.keyboardist.trim() !== '-') musisiList.push(item.keyboardist.trim());
+      if (item.guitarist && item.guitarist.trim() && item.guitarist.trim() !== '-') musisiList.push(item.guitarist.trim());
+      if (item.bassist && item.bassist.trim() && item.bassist.trim() !== '-') musisiList.push(item.bassist.trim());
+      if (item.drummer && item.drummer.trim() && item.drummer.trim() !== '-') musisiList.push(item.drummer.trim());
+      let timMusikText = '-';
+      if (musisiList.length === 1) timMusikText = escapeHtml(musisiList[0]);
+      else if (musisiList.length > 1) timMusikText = `${musisiList.length} Orang`;
+
+      let mmList = (item.soundman && item.soundman.trim() && item.soundman.trim() !== '-') 
+        ? item.soundman.split(',').map(s => s.trim()).filter(s => s.length > 0) 
+        : [];
+      let multimediaText = '-';
+      if (mmList.length === 1) multimediaText = escapeHtml(mmList[0]);
+      else if (mmList.length > 1) multimediaText = `${mmList.length} Orang`;
+
+      const rowHtml = `
+        <tr>
+          <td class="text-center">${index + 1}</td>
+          <td>${formattedDate}</td>
+          <td>${escapeHtml(item.sesiIbadah)}</td>
+          <td>${wlSingersText}</td>
+          <td>${timMusikText}</td>
+          <td>${multimediaText}</td>
+          <td class="text-center" style="white-space: nowrap;">
+            <button class="btn btn-info btn-sm action-btn" onclick="viewDetail('${item.id}')" data-toggle="tooltip" title="Lihat Detail Jadwal">
+              <i class="fas fa-eye"></i>
+            </button>
+            <a class="btn btn-warning btn-sm action-btn" href="form-jadwal.html?id=${item.id}" data-toggle="tooltip" title="Edit Jadwal">
+              <i class="fas fa-edit"></i>
+            </a>
+            <button class="btn btn-danger btn-sm action-btn" onclick="deleteJadwal('${item.id}')" data-toggle="tooltip" title="Hapus Jadwal">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+      tbody.append(rowHtml);
+    });
+
+    // Re-initialize DataTable
+    dataTableInstance = $('#tableJadwal').DataTable({
+      responsive: true,
+      autoWidth: false,
+      language: {
+        url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/id.json',
+        emptyTable: "Belum ada jadwal musik. Klik 'Tambah Jadwal' atau 'Muat Data Contoh'."
+      }
+    });
+
+    // Initialize tooltips with hover trigger & auto cleanup
+    $('.tooltip').remove();
+    $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });
+  }
+
+  // Render App (Instant Local Data + Background Google Sheet Sync)
+  async function renderApp() {
+    // 1. Immediately render cached data from LocalStorage (0ms Instant Load Speed!)
+    const localSchedules = getSchedules();
+    renderTableRows(localSchedules);
+
+    // 2. Fetch fresh data from Google Sheet if URL configured
+    const gasUrl = getGasUrl();
+    if (gasUrl) {
+      $('#syncStatus').show();
+      try {
+        const res = await fetch(gasUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data)) {
+            saveSchedules(data);
+            renderTableRows(data);
+          }
+        }
+      } catch (err) {
+        console.warn('Gagal sync Google Sheet:', err);
+      } finally {
+        $('#syncStatus').fadeOut('fast');
+      }
+    }
+  }
+
+  // Global handler to destroy stuck tooltips on click or mouse leave
+  $(document).on('click mouseleave', '[data-toggle="tooltip"]', function() {
+    $(this).tooltip('hide');
+    $('.tooltip').remove();
+  });
+
+
+
+  // Delete Jadwal
+  function deleteJadwal(id) {
+    Swal.fire({
+      title: 'Hapus Jadwal Ini?',
+      text: "Data jadwal pelayanan musik ini akan dihapus.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        let schedules = getSchedules();
+        schedules = schedules.filter(s => s.id !== id);
+        saveSchedules(schedules);
+
+        const gasUrl = getGasUrl();
+        if (gasUrl) {
+          try {
+            await fetch(gasUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'delete', id: id })
+            });
+          } catch(err) {
+            console.warn('Google Sheet delete error:', err);
+          }
+        }
+
+        renderApp();
+        Toast.fire({ icon: 'success', title: 'Jadwal berhasil dihapus.' });
+      }
+    });
+  }
+
+  // View Readonly Detail Modal
+  function viewDetail(id) {
+    const schedules = getSchedules();
+    const item = schedules.find(s => s.id === id);
+    if (!item) return;
+
+    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    let formattedDate = item.tanggalWaktu;
+    if (item.tanggalWaktu) {
+      const dateParts = item.tanggalWaktu.split('T')[0].split('-');
+      if (dateParts.length === 3) {
+        const dateObj = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2]));
+        const dayName = days[dateObj.getDay()];
+        const dd = String(dateObj.getDate()).padStart(2, '0');
+        const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const yyyy = dateObj.getFullYear();
+        formattedDate = `${dayName}, ${dd}/${mm}/${yyyy}`;
+      }
+    }
+
+    let songsHtml = '';
+    if (Array.isArray(item.daftarLagu) && item.daftarLagu.length > 0) {
+      songsHtml = `<div class="mt-3">
+        <h6 class="font-weight-bold text-secondary mb-2 text-left"><i class="fas fa-music mr-1"></i>Daftar Lagu (${item.daftarLagu.length})</h6>`;
+      item.daftarLagu.forEach((song, idx) => {
+        songsHtml += `
+          <div class="card card-outline card-secondary mb-3 text-left">
+            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center w-100">
+              <strong class="text-dark font-weight-bold" style="font-size: 1rem;">${idx + 1}. ${escapeHtml(song.judul || 'Tanpa Judul')}</strong>
+              ${song.penyanyi ? `<span class="badge badge-info ml-auto font-weight-normal px-2 py-1">${escapeHtml(song.penyanyi)}</span>` : ''}
+            </div>
+            <div class="card-body py-2">
+              ${song.catatan ? `<div class="mb-2 text-secondary"><small><i class="fas fa-sticky-note mr-1"></i><strong>Catatan:</strong> ${escapeHtml(song.catatan)}</small></div>` : ''}
+              ${song.youtube ? `<div class="mb-2"><a href="${escapeHtml(song.youtube)}" target="_blank" class="btn btn-xs btn-danger"><i class="fab fa-youtube mr-1"></i> Tonton di YouTube</a></div>` : ''}
+              ${song.lirik ? `<div class="p-2 bg-light rounded border text-dark song-lirik-view" style="font-size:0.9rem;">${song.lirik}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      songsHtml += `</div>`;
+    }
+
+    const modalHtml = `
+      <div class="text-left px-2" style="max-height: 70vh; overflow-y: auto; overflow-x: hidden;">
+        <div class="card card-outline card-secondary mb-3">
+          <div class="card-body py-3">
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <small class="text-muted d-block">Tanggal Pelayanan</small>
+                <span><i class="far fa-calendar-alt mr-1"></i>${formattedDate}</span>
+              </div>
+              <div class="col-md-6 mb-2">
+                <small class="text-muted d-block">Sesi Ibadah</small>
+                <span><i class="fas fa-church mr-1"></i>${escapeHtml(item.sesiIbadah || '-')}</span>
+              </div>
+            </div>
+            <hr class="my-2">
+            <div class="row">
+              <div class="col-md-6 mb-2">
+                <small class="text-muted d-block">Worship Leader (WL)</small>
+                <span>${escapeHtml(item.worshipLeader || '-')}</span>
+              </div>
+              <div class="col-md-6 mb-2">
+                <small class="text-muted d-block">Singer(s)</small>
+                <span>${escapeHtml(item.singers || '-')}</span>
+              </div>
+            </div>
+            <hr class="my-2">
+            <div class="row">
+              <div class="col-md-3 col-6 mb-2">
+                <small class="text-muted d-block">Keyboard</small>
+                <span>${escapeHtml(item.keyboardist || '-')}</span>
+              </div>
+              <div class="col-md-3 col-6 mb-2">
+                <small class="text-muted d-block">Gitaris</small>
+                <span>${escapeHtml(item.guitarist || '-')}</span>
+              </div>
+              <div class="col-md-3 col-6 mb-2">
+                <small class="text-muted d-block">Bassist</small>
+                <span>${escapeHtml(item.bassist || '-')}</span>
+              </div>
+              <div class="col-md-3 col-6 mb-2">
+                <small class="text-muted d-block">Drummer</small>
+                <span>${escapeHtml(item.drummer || '-')}</span>
+              </div>
+            </div>
+            <hr class="my-2">
+            <div class="row">
+              <div class="col-12">
+                <small class="text-muted d-block">Multimedia (Operator)</small>
+                <span>${escapeHtml(item.soundman || '-')}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        ${songsHtml}
+      </div>
+    `;
+
+    Swal.fire({
+      title: 'Detail Jadwal Pelayanan',
+      html: modalHtml,
+      width: '750px',
+      showCloseButton: true,
+      showConfirmButton: false,
+      allowOutsideClick: false,
+      didOpen: () => {
+        $('.swal2-close').attr('data-toggle', 'tooltip').attr('title', 'Tutup Detail').tooltip({ trigger: 'hover' });
+      }
+    });
+  }
+
+  // View Song List Modal
+  function viewLagu(id) {
+    const schedules = getSchedules();
+    const item = schedules.find(s => s.id === id);
+    if (!item || !item.daftarLagu) return;
+
+    let htmlContent = '';
+
+    if (Array.isArray(item.daftarLagu) && item.daftarLagu.length > 0) {
+      htmlContent = `<div class="text-left px-3 py-1" style="max-height:60vh; overflow-y:auto; overflow-x:hidden;">`;
+      item.daftarLagu.forEach((song, idx) => {
+        htmlContent += `
+          <div class="card card-outline card-primary mb-3 mx-1">
+            <div class="card-header py-2 bg-light d-flex justify-content-between align-items-center w-100">
+              <strong class="text-primary font-weight-bold" style="font-size: 1.05rem;">${idx + 1}. ${escapeHtml(song.judul || 'Tanpa Judul')}</strong>
+              ${song.penyanyi ? `<span class="badge badge-info ml-auto font-weight-normal px-2 py-1">${escapeHtml(song.penyanyi)}</span>` : ''}
+            </div>
+            <div class="card-body py-2">
+              ${song.catatan ? `<div class="mb-2 text-secondary"><small><i class="fas fa-sticky-note mr-1"></i><strong>Catatan:</strong> ${escapeHtml(song.catatan)}</small></div>` : ''}
+              ${song.youtube ? `<div class="mb-2"><a href="${escapeHtml(song.youtube)}" target="_blank" class="btn btn-xs btn-danger"><i class="fab fa-youtube mr-1"></i> Tonton di YouTube</a></div>` : ''}
+              ${song.lirik ? `<div class="p-2 bg-light rounded border text-dark song-lirik-view" style="font-size:0.9rem;">${song.lirik}</div>` : ''}
+            </div>
+          </div>
+        `;
+      });
+      htmlContent += `</div>`;
+    } else if (typeof item.daftarLagu === 'string') {
+      htmlContent = `<pre class="text-left bg-light p-3 rounded" style="font-family: inherit; font-size:0.95rem;">${escapeHtml(item.daftarLagu)}</pre>`;
+    }
+
+    Swal.fire({
+      title: 'Daftar Lagu Ibadah',
+      html: htmlContent,
+      width: '700px',
+      showCloseButton: true,
+      showConfirmButton: false,
+      allowOutsideClick: false,
+      didOpen: () => {
+        $('.swal2-close').attr('data-toggle', 'tooltip').attr('title', 'Tutup Detail').tooltip({ trigger: 'hover' });
+      }
+    });
+  }
+
+  // Load Sample Data
+  function loadSampleData() {
+    const samples = [
+      {
+        id: 'jdw_1',
+        tanggalWaktu: '2026-08-02',
+        sesiIbadah: 'Ibadah Raya 1 (Pagi)',
+        worshipLeader: 'Daud S.',
+        singers: 'Maria, Yohana, Ruth',
+        keyboardist: 'Samuel',
+        guitarist: 'Yosua',
+        bassist: 'Gideon',
+        drummer: 'Daniel',
+        soundman: 'Lukas, Markus',
+        daftarLagu: [
+          {
+            judul: 'Masuk Gerbang-Nya',
+            penyanyi: 'Symphony Worship',
+            youtube: 'https://youtube.com',
+            catatan: 'Kunci Do = G',
+            lirik: '<p><span data-auto-keyword="true" style="color: #ffff00; font-weight: bold;">Verse 1</span></p><p>Masuk gerbang-Nya dengan hati bersyukur</p><p>Halaman-Nya dengan pujian...</p><p><br></p><p><span data-auto-keyword="true" style="color: #ff9900; font-weight: bold;">Chorus</span></p><p>Bersyukurlah kepada-Nya, puji nama-Nya</p><p>Sebab Tuhan itu baik!</p>'
+          },
+          {
+            judul: 'Kaulah Harapanku',
+            penyanyi: 'GMS Worship',
+            youtube: '',
+            catatan: 'Tempo lambat',
+            lirik: '<p><span data-auto-keyword="true" style="color: #ffff00; font-weight: bold;">Verse 1</span></p><p>Bukan dengan kuatku, namun oleh Roh-Mu...</p><p><br></p><p><span data-auto-keyword="true" style="color: #ff9900; font-weight: bold;">Chorus</span></p><p>Kaulah harapanku, Yesus Tuhan...</p>'
+          }
+        ]
+      },
+      {
+        id: 'jdw_2',
+        tanggalWaktu: '2026-08-02',
+        sesiIbadah: 'Ibadah Raya 2 (Sore)',
+        worshipLeader: 'Jonathan K.',
+        singers: 'Sarah, Debora',
+        keyboardist: 'Nathan',
+        guitarist: 'Andrew',
+        bassist: 'Peter',
+        drummer: 'Timotius',
+        soundman: 'Philip',
+        daftarLagu: [
+          {
+            judul: 'Datanglah Ke Bait-Nya',
+            penyanyi: 'NDW Worship',
+            youtube: 'https://youtube.com',
+            catatan: 'Do = F',
+            lirik: '<p><span data-auto-keyword="true" style="color: #ffff00; font-weight: bold;">Verse 1</span></p><p>Datanglah ke bait-Nya dengan hati bersuka...</p><p><br></p><p><span data-auto-keyword="true" style="color: #ff9900; font-weight: bold;">Chorus</span></p><p>Sebab Dia yang bertakhta di atas pujian...</p>'
+          }
+        ]
+      },
+      {
+        id: 'jdw_3',
+        tanggalWaktu: '2026-08-07',
+        sesiIbadah: 'Ibadah Pengerja',
+        worshipLeader: 'Budi Santoso',
+        singers: 'Grace, Jessica',
+        keyboardist: 'Benny',
+        guitarist: 'Alex',
+        bassist: 'Rian',
+        drummer: 'Jason',
+        soundman: 'Michael',
+        daftarLagu: [
+          {
+            judul: 'Setia Sampai Akhir',
+            penyanyi: 'True Worshippers',
+            youtube: '',
+            catatan: 'Do = C',
+            lirik: '<p><span data-auto-keyword="true" style="color: #ffff00; font-weight: bold;">Verse 1</span></p><p>Kupersembahkan hidupku pada-Mu...</p><p><br></p><p><span data-auto-keyword="true" style="color: #ff9900; font-weight: bold;">Chorus</span></p><p>Ku mau setia sampai akhir hidupku...</p>'
+          }
+        ]
+      },
+      {
+        id: 'jdw_4',
+        tanggalWaktu: '2026-08-09',
+        sesiIbadah: 'Ibadah Sekolah Minggu',
+        worshipLeader: 'Kak Maria',
+        singers: 'Kak Ani, Kak Budi',
+        keyboardist: 'Kak Samuel',
+        guitarist: '-',
+        bassist: '-',
+        drummer: 'Kak Daniel',
+        soundman: 'David',
+        daftarLagu: [
+          {
+            judul: 'Kambing Mbee Mbee',
+            penyanyi: 'Lagu Anak SM',
+            youtube: '',
+            catatan: 'Gerak & Lagu',
+            lirik: '<p><span data-auto-keyword="true" style="color: #ffff00; font-weight: bold;">Verse 1</span></p><p>Kambing mbee mbee, kucing meong meong...</p><p><br></p><p><span data-auto-keyword="true" style="color: #ff9900; font-weight: bold;">Chorus</span></p><p>Tapi anak Tuhan selalu gembira...</p>'
+          }
+        ]
+      }
+    ];
+
+    saveSchedules(samples);
+    renderApp();
+    Toast.fire({ icon: 'info', title: 'Data contoh berhasil dimuat!' });
+  }
+
+  // Confirm Reset All Data
+  function confirmResetAll() {
+    Swal.fire({
+      title: 'Kosongkan Semua Data?',
+      text: "Seluruh jadwal di LocalStorage akan dihapus bersih.",
+      icon: 'error',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Hapus Semua',
+      cancelButtonText: 'Batal'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderApp();
+        Toast.fire({ icon: 'success', title: 'Semua data telah dibersihkan.' });
+      }
+    });
+  }
+
+  // Helper escape HTML
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+</script>
+</body>
+</html>
