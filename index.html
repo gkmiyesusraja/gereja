@@ -72,7 +72,8 @@
     </ul>
 
     <!-- Right navbar links -->
-    <ul class="navbar-nav ml-auto">
+    <ul class="navbar-nav ml-auto" id="userNavSection">
+      <!-- Dynamic User Profile / Login Button via JS -->
     </ul>
   </nav>
   <!-- /.navbar -->
@@ -97,7 +98,12 @@
               <p>Jadwal Musik</p>
             </a>
           </li>
-
+          <li class="nav-item" id="navKelolaUser" style="display: none;">
+            <a href="users.html" class="nav-link">
+              <i class="nav-icon fas fa-users-cog"></i>
+              <p>Kelola User</p>
+            </a>
+          </li>
         </ul>
       </nav>
       <!-- /.sidebar-menu -->
@@ -120,7 +126,7 @@
               <span id="syncStatus" class="ml-3 small text-muted font-weight-normal" style="display:none;"><i class="fas fa-sync-alt fa-spin text-primary mr-1"></i>Menyinkronkan...</span>
             </h3>
             <div class="card-tools">
-              <a href="form-jadwal.html" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Tambah Jadwal Baru">
+              <a href="form-jadwal.html" id="btnAddJadwal" class="btn btn-primary btn-sm" style="display: none;" data-toggle="tooltip" title="Tambah Jadwal Baru">
                 <i class="fas fa-plus"></i>
               </a>
             </div>
@@ -211,7 +217,13 @@
       $('html, body').animate({ scrollTop: 0 }, 'fast');
     });
 
-    // Initial render
+    // Initial auth check
+    if (!getCurrentUser()) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    renderUserNav();
     renderApp();
   });
 
@@ -295,10 +307,274 @@
     return getSchedules();
   }
 
+  // User Management & RBAC Authentication
+  const USERS_KEY = 'church_users_v1';
+  const CURRENT_USER_KEY = 'church_current_user';
+
+  const DEFAULT_USERS = [
+    { username: 'dev', password: 'dev123', nama: 'Pengembang (Dev)', role: 'dev' },
+    { username: 'admin', password: 'admin123', nama: 'Admin Utama', role: 'admin' },
+    { username: 'user1', password: 'user123', nama: 'Petugas User 1', role: 'user' }
+  ];
+
+  function getUsers() {
+    const raw = localStorage.getItem(USERS_KEY);
+    return raw ? JSON.parse(raw) : DEFAULT_USERS;
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  function getCurrentUser() {
+    const raw = localStorage.getItem(CURRENT_USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  function setCurrentUser(user) {
+    if (user) {
+      localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(user));
+    } else {
+      localStorage.removeItem(CURRENT_USER_KEY);
+    }
+    renderUserNav();
+  }
+
+  function renderUserNav() {
+    const user = getCurrentUser();
+    const nav = $('#userNavSection');
+    nav.empty();
+
+    if (user) {
+      $('#btnAddJadwal').show();
+      if (user.role === 'dev' || user.role === 'admin') {
+        $('#navKelolaUser').show();
+      } else {
+        $('#navKelolaUser').hide();
+      }
+
+      nav.append(`
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-dark font-weight-normal" data-toggle="dropdown" href="#" role="button">
+            <i class="fas fa-user-circle mr-1 text-primary"></i> <strong>${escapeHtml(user.nama)}</strong> <span class="badge badge-secondary ml-1">${user.role.toUpperCase()}</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-item disabled text-muted small py-1"><i class="fas fa-id-badge mr-1"></i> ${escapeHtml(user.username)}</div>
+            <div class="dropdown-divider"></div>
+            <a href="javascript:void(0)" onclick="logoutUser()" class="dropdown-item text-danger py-1"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+          </div>
+        </li>
+      `);
+    } else {
+      $('#btnAddJadwal').hide();
+      $('#navKelolaUser').hide();
+      nav.append(`
+        <li class="nav-item">
+          <button class="btn btn-outline-primary btn-sm my-1" onclick="openLoginModal()"><i class="fas fa-sign-in-alt mr-1"></i> Login</button>
+        </li>
+      `);
+    }
+  }
+
+  function openLoginModal() {
+    Swal.fire({
+      title: 'Login Pengguna',
+      html: `
+        <div class="text-left px-2">
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Username</label>
+            <input type="text" id="loginUsername" class="form-control" placeholder="Ketik username">
+          </div>
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Password</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="Ketik password">
+          </div>
+          <div class="small text-muted mt-2 bg-light p-2 rounded">
+            <strong>Akun Bawaan Testing:</strong><br>
+            • Dev: <code>dev</code> / <code>dev123</code><br>
+            • Admin: <code>admin</code> / <code>admin123</code><br>
+            • User: <code>user1</code> / <code>user123</code>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Masuk',
+      cancelButtonText: 'Batal',
+      allowOutsideClick: false,
+      didOpen: () => {
+        $('.swal2-close').attr('data-toggle', 'tooltip').attr('title', 'Tutup Detail').tooltip({ trigger: 'hover' });
+      },
+      preConfirm: () => {
+        const u = $('#loginUsername').val().trim();
+        const p = $('#loginPassword').val().trim();
+        if (!u || !p) {
+          Swal.showValidationMessage('Username dan Password wajib diisi!');
+          return false;
+        }
+        const users = getUsers();
+        const found = users.find(x => x.username.toLowerCase() === u.toLowerCase() && x.password === p);
+        if (!found) {
+          Swal.showValidationMessage('Username atau Password salah!');
+          return false;
+        }
+        return found;
+      }
+    }).then((result) => {
+      if (result.isConfirmed && result.value) {
+        setCurrentUser(result.value);
+        Toast.fire({ icon: 'success', title: `Selamat datang, ${result.value.nama}!` });
+        renderApp();
+      }
+    });
+  }
+
+  function logoutUser() {
+    setCurrentUser(null);
+    window.location.href = 'login.html';
+  }
+
+  // Manage Users Modal (Dev / Admin)
+  function openManageUsersModal() {
+    const currentUser = getCurrentUser();
+    if (!currentUser || (currentUser.role !== 'dev' && currentUser.role !== 'admin')) {
+      Toast.fire({ icon: 'warning', title: 'Akses ditolak.' });
+      return;
+    }
+
+    const users = getUsers();
+    let rowsHtml = '';
+    users.forEach((u, i) => {
+      let roleBadge = u.role === 'dev' ? 'badge-danger' : (u.role === 'admin' ? 'badge-primary' : 'badge-secondary');
+      rowsHtml += `
+        <tr>
+          <td>${i + 1}</td>
+          <td><strong>${escapeHtml(u.username)}</strong></td>
+          <td>${escapeHtml(u.nama)}</td>
+          <td><span class="badge ${roleBadge}">${u.role.toUpperCase()}</span></td>
+        </tr>
+      `;
+    });
+
+    const canAddUser = currentUser.role === 'dev' || currentUser.role === 'admin';
+
+    Swal.fire({
+      title: 'Manajemen Pengguna',
+      html: `
+        <div class="text-left px-1 mb-2">
+          ${canAddUser ? `<button class="btn btn-sm btn-success mb-2" onclick="addNewUserForm()"><i class="fas fa-user-plus mr-1"></i> Tambah User Baru</button>` : ''}
+          <div class="table-responsive" style="max-height: 40vh; overflow-y: auto;">
+            <table class="table table-sm table-bordered">
+              <thead>
+                <tr class="bg-light">
+                  <th>No</th>
+                  <th>Username</th>
+                  <th>Nama</th>
+                  <th>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `,
+      showConfirmButton: false,
+      showCloseButton: true,
+      allowOutsideClick: false,
+      didOpen: () => {
+        $('.swal2-close').attr('data-toggle', 'tooltip').attr('title', 'Tutup Detail').tooltip({ trigger: 'hover' });
+      }
+    });
+  }
+
+  function addNewUserForm() {
+    const currentUser = getCurrentUser();
+    if (!currentUser || (currentUser.role !== 'dev' && currentUser.role !== 'admin')) return;
+
+    let roleOptions = `<option value="user">User Biasa</option>`;
+    if (currentUser.role === 'dev') {
+      roleOptions = `<option value="user">User Biasa</option><option value="admin">Admin</option><option value="dev">Developer</option>`;
+    }
+
+    Swal.fire({
+      title: 'Tambah User Baru',
+      html: `
+        <div class="text-left px-2">
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Username</label>
+            <input type="text" id="newUsername" class="form-control" placeholder="cth: pelayan1">
+          </div>
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Password</label>
+            <input type="password" id="newPassword" class="form-control" placeholder="Password">
+          </div>
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Nama Lengkap</label>
+            <input type="text" id="newNama" class="form-control" placeholder="cth: Yohanes Budi">
+          </div>
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Role / Hak Akses</label>
+            <select id="newRole" class="form-control">
+              ${roleOptions}
+            </select>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Simpan User',
+      cancelButtonText: 'Batal',
+      allowOutsideClick: false,
+      preConfirm: () => {
+        const u = $('#newUsername').val().trim();
+        const p = $('#newPassword').val().trim();
+        const n = $('#newNama').val().trim();
+        const r = $('#newRole').val();
+
+        if (!u || !p || !n) {
+          Swal.showValidationMessage('Semua kolom wajib diisi!');
+          return false;
+        }
+
+        const users = getUsers();
+        if (users.some(x => x.username.toLowerCase() === u.toLowerCase())) {
+          Swal.showValidationMessage('Username sudah digunakan!');
+          return false;
+        }
+
+        return { username: u, password: p, nama: n, role: r };
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed && result.value) {
+        const users = getUsers();
+        users.push(result.value);
+        saveUsers(users);
+
+        // Sync to Google Sheet if URL set
+        const gasUrl = getGasUrl();
+        if (gasUrl) {
+          try {
+            fetch(gasUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'saveUser', data: result.value })
+            });
+          } catch(e) {}
+        }
+
+        Toast.fire({ icon: 'success', title: 'User baru berhasil ditambahkan!' });
+        openManageUsersModal();
+      }
+    });
+  }
+
   // Helper to render table rows
   function renderTableRows(schedules) {
     if (!schedules) schedules = [];
     
+    const currentUser = getCurrentUser();
+
     // Sort schedules by date ascending
     schedules.sort((a, b) => new Date(a.tanggalWaktu) - new Date(b.tanggalWaktu));
 
@@ -351,6 +627,18 @@
       if (mmList.length === 1) multimediaText = escapeHtml(mmList[0]);
       else if (mmList.length > 1) multimediaText = `${mmList.length} Orang`;
 
+      // RBAC Permission logic for Edit & Delete buttons:
+      // - dev: Can Edit & Delete ALL schedules
+      // - admin / user: Can Edit & Delete ONLY schedules created by themselves
+      let canEditOrDelete = false;
+      if (currentUser) {
+        if (currentUser.role === 'dev') {
+          canEditOrDelete = true;
+        } else if (item.createdBy && item.createdBy === currentUser.username) {
+          canEditOrDelete = true;
+        }
+      }
+
       const rowHtml = `
         <tr>
           <td class="text-center">${index + 1}</td>
@@ -363,12 +651,14 @@
             <button class="btn btn-info btn-sm action-btn" onclick="viewDetail('${item.id}')" data-toggle="tooltip" title="Lihat Detail Jadwal">
               <i class="fas fa-eye"></i>
             </button>
-            <a class="btn btn-warning btn-sm action-btn" href="form-jadwal.html?id=${item.id}" data-toggle="tooltip" title="Edit Jadwal">
-              <i class="fas fa-edit"></i>
-            </a>
-            <button class="btn btn-danger btn-sm action-btn" onclick="deleteJadwal('${item.id}')" data-toggle="tooltip" title="Hapus Jadwal">
-              <i class="fas fa-trash"></i>
-            </button>
+            ${canEditOrDelete ? `
+              <a class="btn btn-warning btn-sm action-btn" href="form-jadwal.html?id=${item.id}" data-toggle="tooltip" title="Edit Jadwal">
+                <i class="fas fa-edit"></i>
+              </a>
+              <button class="btn btn-danger btn-sm action-btn" onclick="deleteJadwal('${item.id}')" data-toggle="tooltip" title="Hapus Jadwal">
+                <i class="fas fa-trash"></i>
+              </button>
+            ` : ''}
           </td>
         </tr>
       `;

@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kelola User | GKMI Yesus Raja</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- DataTables Bootstrap 4 -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap4.min.css">
+  <!-- AdminLTE Theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <style>
+    body { font-family: 'Source Sans Pro', sans-serif; }
+    .card-title { font-size: 1.15rem; }
+    .back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1050;
+      display: none;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      text-align: center;
+      line-height: 42px;
+      padding: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+  </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto" id="userNavSection">
+    </ul>
+  </nav>
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a href="index.html" class="brand-link">
+      <i class="fas fa-church brand-image img-circle elevation-3 p-2 bg-primary text-white" style="opacity: .8"></i>
+      <span class="brand-text font-weight-light">GKMI Yesus Raja</span>
+    </a>
+
+    <div class="sidebar">
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-header">MENU UTAMA</li>
+          <li class="nav-item">
+            <a href="index.html" class="nav-link">
+              <i class="nav-icon fas fa-calendar-alt"></i>
+              <p>Jadwal Musik</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="users.html" class="nav-link active">
+              <i class="nav-icon fas fa-users-cog"></i>
+              <p>Kelola User</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <section class="content pt-3">
+      <div class="container-fluid">
+
+        <!-- Main Card -->
+        <div class="card card-primary card-outline">
+          <div class="card-header border-0">
+            <h3 class="card-title font-weight-bold d-flex align-items-center">
+              <span>Daftar Pengguna / User</span>
+              <span id="syncStatus" class="ml-3 small text-muted font-weight-normal" style="display:none;"><i class="fas fa-sync-alt fa-spin text-primary mr-1"></i>Menyinkronkan...</span>
+            </h3>
+            <div class="card-tools">
+              <a href="form-user.html" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Tambah User Baru">
+                <i class="fas fa-plus"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table id="tableUsers" class="table table-bordered table-striped table-hover w-100">
+                <thead>
+                  <tr>
+                    <th style="width: 5%">No</th>
+                    <th style="width: 25%">Username</th>
+                    <th style="width: 45%">Nama Lengkap</th>
+                    <th style="width: 25%">Role / Hak Akses</th>
+                  </tr>
+                </thead>
+                <tbody id="tbodyUsers">
+                  <!-- Data rendered via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="float-right d-none d-sm-inline">
+      Aplikasi Pelayanan Musik
+    </div>
+    <strong>GKMI Yesus Raja &copy; 2026</strong>. All rights reserved.
+  </footer>
+
+  <!-- Back to Top Button -->
+  <a id="btnBackToTop" href="#" class="btn btn-primary back-to-top" role="button" data-toggle="tooltip" title="Kembali ke Atas">
+    <i class="fas fa-chevron-up"></i>
+  </a>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  const USERS_KEY = 'church_users_v1';
+  const CURRENT_USER_KEY = 'church_current_user';
+  const GAS_URL_KEY = 'church_gas_web_app_url';
+
+  const DEFAULT_USERS = [
+    { username: 'dev', password: 'dev123', nama: 'Pengembang (Dev)', role: 'dev' },
+    { username: 'admin', password: 'admin123', nama: 'Admin Utama', role: 'admin' },
+    { username: 'user1', password: 'user123', nama: 'Petugas User 1', role: 'user' }
+  ];
+
+  let dataTableUsersInstance = null;
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true
+  });
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function getUsers() {
+    const raw = localStorage.getItem(USERS_KEY);
+    return raw ? JSON.parse(raw) : DEFAULT_USERS;
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  function getCurrentUser() {
+    const raw = localStorage.getItem(CURRENT_USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  function getGasUrl() {
+    return localStorage.getItem(GAS_URL_KEY) || '';
+  }
+
+  function renderUserNav() {
+    const user = getCurrentUser();
+    const nav = $('#userNavSection');
+    nav.empty();
+
+    if (user) {
+      nav.append(`
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-dark font-weight-normal" data-toggle="dropdown" href="#" role="button">
+            <i class="fas fa-user-circle mr-1 text-primary"></i> <strong>${escapeHtml(user.nama)}</strong> <span class="badge badge-secondary ml-1">${user.role.toUpperCase()}</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-item disabled text-muted small py-1"><i class="fas fa-id-badge mr-1"></i> ${escapeHtml(user.username)}</div>
+            <div class="dropdown-divider"></div>
+            <a href="javascript:void(0)" onclick="logoutUser()" class="dropdown-item text-danger py-1"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+          </div>
+        </li>
+      `);
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem(CURRENT_USER_KEY);
+    window.location.href = 'login.html';
+  }
+
+  function renderTableUsers(users) {
+    if (!users) users = [];
+    if (dataTableUsersInstance) dataTableUsersInstance.destroy();
+
+    const tbody = $('#tbodyUsers');
+    tbody.empty();
+
+    users.forEach((u, index) => {
+      let roleBadge = u.role === 'dev' ? 'badge-danger' : (u.role === 'admin' ? 'badge-primary' : 'badge-secondary');
+      const rowHtml = `
+        <tr>
+          <td class="text-center">${index + 1}</td>
+          <td><strong>${escapeHtml(u.username)}</strong></td>
+          <td>${escapeHtml(u.nama)}</td>
+          <td><span class="badge ${roleBadge} px-2 py-1">${u.role.toUpperCase()}</span></td>
+        </tr>
+      `;
+      tbody.append(rowHtml);
+    });
+
+    dataTableUsersInstance = $('#tableUsers').DataTable({
+      responsive: true,
+      autoWidth: false,
+      language: {
+        url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/id.json',
+        emptyTable: "Belum ada user tersimpan."
+      }
+    });
+
+    $('.tooltip').remove();
+    $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });
+  }
+
+  async function loadUsersFromBackend() {
+    const localUsers = getUsers();
+    renderTableUsers(localUsers);
+
+    const gasUrl = getGasUrl();
+    if (gasUrl) {
+      $('#syncStatus').show();
+      try {
+        const res = await fetch(gasUrl + '?action=getUsers');
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            saveUsers(data);
+            renderTableUsers(data);
+          }
+        }
+      } catch (err) {
+        console.warn('Gagal sync Users dari Google Sheet:', err);
+      } finally {
+        $('#syncStatus').fadeOut('fast');
+      }
+    }
+  }
+
+  function addNewUserForm() {
+    const currentUser = getCurrentUser();
+    if (!currentUser || (currentUser.role !== 'dev' && currentUser.role !== 'admin')) return;
+
+    let roleOptions = `<option value="user">User Biasa</option>`;
+    if (currentUser.role === 'dev') {
+      roleOptions = `<option value="user">User Biasa</option><option value="admin">Admin</option><option value="dev">Developer</option>`;
+    }
+
+    Swal.fire({
+      title: 'Tambah User Baru',
+      html: `
+        <div class="text-left px-2">
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Username</label>
+            <input type="text" id="newUsername" class="form-control" placeholder="cth: pelayan1">
+          </div>
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Password</label>
+            <input type="password" id="newPassword" class="form-control" placeholder="Password">
+          </div>
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Nama Lengkap</label>
+            <input type="text" id="newNama" class="form-control" placeholder="cth: Yohanes Budi">
+          </div>
+          <div class="form-group mb-2">
+            <label class="small text-muted mb-1">Role / Hak Akses</label>
+            <select id="newRole" class="form-control">
+              ${roleOptions}
+            </select>
+          </div>
+        </div>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Simpan User',
+      cancelButtonText: 'Batal',
+      allowOutsideClick: false,
+      didOpen: () => {
+        $('.swal2-close').attr('data-toggle', 'tooltip').attr('title', 'Tutup Detail').tooltip({ trigger: 'hover' });
+      },
+      preConfirm: () => {
+        const u = $('#newUsername').val().trim();
+        const p = $('#newPassword').val().trim();
+        const n = $('#newNama').val().trim();
+        const r = $('#newRole').val();
+
+        if (!u || !p || !n) {
+          Swal.showValidationMessage('Semua kolom wajib diisi!');
+          return false;
+        }
+
+        const users = getUsers();
+        if (users.some(x => x.username.toLowerCase() === u.toLowerCase())) {
+          Swal.showValidationMessage('Username sudah digunakan!');
+          return false;
+        }
+
+        return { username: u, password: p, nama: n, role: r };
+      }
+    }).then(async (result) => {
+      if (result.isConfirmed && result.value) {
+        const users = getUsers();
+        users.push(result.value);
+        saveUsers(users);
+
+        // Sync to Google Sheet
+        const gasUrl = getGasUrl();
+        if (gasUrl) {
+          try {
+            fetch(gasUrl, {
+              method: 'POST',
+              mode: 'no-cors',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'saveUser', data: result.value })
+            });
+          } catch(e) {}
+        }
+
+        Toast.fire({ icon: 'success', title: 'User baru berhasil ditambahkan!' });
+        renderTableUsers(users);
+      }
+    });
+  }
+
+  $(document).ready(function() {
+    const currentUser = getCurrentUser();
+    if (!currentUser || (currentUser.role !== 'dev' && currentUser.role !== 'admin')) {
+      alert('Akses ditolak. Halaman ini hanya untuk Admin & Dev.');
+      window.location.href = 'index.html';
+      return;
+    }
+
+    renderUserNav();
+    loadUsersFromBackend();
+
+    $('.tooltip').remove();
+    $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });
+
+    $(document).on('click mouseleave', '[data-toggle="tooltip"]', function() {
+      $(this).tooltip('hide');
+      $('.tooltip').remove();
+    });
+
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 150) {
+        $('#btnBackToTop').fadeIn();
+      } else {
+        $('#btnBackToTop').fadeOut();
+      }
+    });
+
+    $('#btnBackToTop').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({ scrollTop: 0 }, 'fast');
+    });
+  });
+</script>
+</body>
+</html>

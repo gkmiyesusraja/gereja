@@ -1,30 +1,38 @@
 // =========================================================================
 // GOOGLE APPS SCRIPT FOR GKMI YESUS RAJA - JADWAL PELAYANAN MUSIK GEREJA
 // =========================================================================
-// Cara Menggunakan:
-// 1. Buka Google Spreadsheet di Google Drive / sheets.google.com
-// 2. Klik menu Ekstensi > Apps Script
-// 3. Paste seluruh isi file ini ke dalam editor Apps Script
-// 4. Klik Simpan (Ctrl + S)
-// 5. Klik Deploy > New deployment > pilih Web app
-// 6. Set "Execute as" = Me (Saya) dan "Who has access" = Anyone (Siapa saja)
-// 7. Klik Deploy dan Copy Web App URL ke aplikasi website (tombol hijau 📊)
+// Mendukung 2 Tab Sheet:
+// 1. "JadwalMusik" (id, tanggalWaktu, sesiIbadah, worshipLeader, singers, keyboardist, guitarist, bassist, drummer, soundman, daftarLagu, createdBy)
+// 2. "Users" (username, password, nama, role)
 // =========================================================================
 
 function doGet(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("JadwalMusik");
-  if (!sheet) {
-    return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
+  var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'getSchedules';
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  if (action === 'getUsers') {
+    var userSheet = ss.getSheetByName("Users");
+    if (!userSheet) return jsonOutput([]);
+    var data = userSheet.getDataRange().getValues();
+    if (data.length <= 1) return jsonOutput([]);
+    var headers = data[0];
+    var users = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var u = {};
+      for (var j = 0; j < headers.length; j++) u[headers[j]] = row[j];
+      users.push(u);
+    }
+    return jsonOutput(users);
   }
   
+  // Default: getSchedules
+  var sheet = ss.getSheetByName("JadwalMusik");
+  if (!sheet) return jsonOutput([]);
   var data = sheet.getDataRange().getValues();
-  if (data.length <= 1) {
-    return ContentService.createTextOutput(JSON.stringify([])).setMimeType(ContentService.MimeType.JSON);
-  }
-  
+  if (data.length <= 1) return jsonOutput([]);
   var headers = data[0];
   var result = [];
-  
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
     var obj = {};
@@ -38,37 +46,66 @@ function doGet(e) {
     }
     result.push(obj);
   }
-  
-  return ContentService.createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
+  return jsonOutput(result);
 }
 
 function doPost(e) {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("JadwalMusik");
-  if (!sheet) {
-    sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("JadwalMusik");
-    sheet.appendRow(["id", "tanggalWaktu", "sesiIbadah", "worshipLeader", "singers", "keyboardist", "guitarist", "bassist", "drummer", "soundman", "daftarLagu"]);
-  }
-  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
   var contents = JSON.parse(e.postData.contents);
   var action = contents.action;
   
+  if (action === 'saveUser') {
+    var userSheet = ss.getSheetByName("Users");
+    if (!userSheet) {
+      userSheet = ss.insertSheet("Users");
+      userSheet.appendRow(["username", "password", "nama", "role"]);
+    }
+    var uData = contents.data;
+    var data = userSheet.getDataRange().getValues();
+    var foundIndex = -1;
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0] === uData.username) {
+        foundIndex = i + 1;
+        break;
+      }
+    }
+    var uRow = [uData.username, uData.password, uData.nama, uData.role];
+    if (foundIndex > 0) userSheet.getRange(foundIndex, 1, 1, uRow.length).setValues([uRow]);
+    else userSheet.appendRow(uRow);
+    return jsonOutput({ status: 'success' });
+  }
+
+  if (action === 'deleteUser') {
+    var userSheet = ss.getSheetByName("Users");
+    if (userSheet) {
+      var uName = contents.username;
+      var data = userSheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0] === uName) {
+          userSheet.deleteRow(i + 1);
+          break;
+        }
+      }
+    }
+    return jsonOutput({ status: 'success' });
+  }
+
   if (action === 'save') {
+    var sheet = ss.getSheetByName("JadwalMusik");
+    if (!sheet) {
+      sheet = ss.insertSheet("JadwalMusik");
+      sheet.appendRow(["id", "tanggalWaktu", "sesiIbadah", "worshipLeader", "singers", "keyboardist", "guitarist", "bassist", "drummer", "soundman", "daftarLagu", "createdBy"]);
+    }
     var payload = contents.data;
     var data = sheet.getDataRange().getValues();
     var foundIndex = -1;
-    
-    if (typeof payload.daftarLagu === 'object') {
-      payload.daftarLagu = JSON.stringify(payload.daftarLagu);
-    }
-    
+    if (typeof payload.daftarLagu === 'object') payload.daftarLagu = JSON.stringify(payload.daftarLagu);
     for (var i = 1; i < data.length; i++) {
       if (data[i][0] === payload.id) {
         foundIndex = i + 1;
         break;
       }
     }
-    
     var rowData = [
       payload.id || '',
       payload.tanggalWaktu || '',
@@ -80,28 +117,32 @@ function doPost(e) {
       payload.bassist || '',
       payload.drummer || '',
       payload.soundman || '',
-      payload.daftarLagu || ''
+      payload.daftarLagu || '',
+      payload.createdBy || ''
     ];
-    
-    if (foundIndex > 0) {
-      sheet.getRange(foundIndex, 1, 1, rowData.length).setValues([rowData]);
-    } else {
-      sheet.appendRow(rowData);
-    }
-    return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
+    if (foundIndex > 0) sheet.getRange(foundIndex, 1, 1, rowData.length).setValues([rowData]);
+    else sheet.appendRow(rowData);
+    return jsonOutput({ status: 'success' });
   }
   
   if (action === 'delete') {
-    var idToDelete = contents.id;
-    var data = sheet.getDataRange().getValues();
-    for (var i = 1; i < data.length; i++) {
-      if (data[i][0] === idToDelete) {
-        sheet.deleteRow(i + 1);
-        break;
+    var sheet = ss.getSheetByName("JadwalMusik");
+    if (sheet) {
+      var idToDelete = contents.id;
+      var data = sheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0] === idToDelete) {
+          sheet.deleteRow(i + 1);
+          break;
+        }
       }
     }
-    return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
+    return jsonOutput({ status: 'success' });
   }
-  
-  return ContentService.createTextOutput(JSON.stringify({ status: 'error' })).setMimeType(ContentService.MimeType.JSON);
+
+  return jsonOutput({ status: 'error' });
+}
+
+function jsonOutput(data) {
+  return ContentService.createTextOutput(JSON.stringify(data)).setMimeType(ContentService.MimeType.JSON);
 }

@@ -53,7 +53,7 @@
         <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
       </li>
     </ul>
-    <ul class="navbar-nav ml-auto">
+    <ul class="navbar-nav ml-auto" id="userNavSection">
     </ul>
   </nav>
 
@@ -73,6 +73,12 @@
               <p>Jadwal Musik</p>
             </a>
           </li>
+          <li class="nav-item" id="navKelolaUser" style="display: none;">
+            <a href="users.html" class="nav-link">
+              <i class="nav-icon fas fa-users-cog"></i>
+              <p>Kelola User</p>
+            </a>
+          </li>
         </ul>
       </nav>
     </div>
@@ -87,11 +93,6 @@
         <div class="card card-primary card-outline">
           <div class="card-header">
             <h3 class="card-title" id="formTitle"><i class="fas fa-calendar-plus mr-2"></i>Tambah Jadwal Musik</h3>
-            <div class="card-tools">
-              <a href="index.html" class="btn btn-secondary btn-sm" data-toggle="tooltip" title="Kembali ke Daftar Jadwal">
-                <i class="fas fa-arrow-left"></i>
-              </a>
-            </div>
           </div>
 
           <form id="formJadwal" novalidate>
@@ -176,6 +177,9 @@
             </div>
 
             <div class="card-footer">
+              <a href="index.html" class="btn btn-secondary btn-sm" data-toggle="tooltip" title="Kembali ke Daftar Jadwal">
+                <i class="fas fa-arrow-left"></i>
+              </a>
               <button type="submit" class="btn btn-primary float-right" data-toggle="tooltip" title="Simpan Data Jadwal">
                 <i class="fas fa-save"></i>
               </button>
@@ -414,7 +418,53 @@
     }
   }
 
+  function renderUserNav() {
+    const raw = localStorage.getItem('church_current_user');
+    const user = raw ? JSON.parse(raw) : null;
+    const nav = $('#userNavSection');
+    nav.empty();
+
+    if (user) {
+      if (user.role === 'dev' || user.role === 'admin') {
+        $('#navKelolaUser').show();
+      } else {
+        $('#navKelolaUser').hide();
+      }
+
+      nav.append(`
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-dark font-weight-normal" data-toggle="dropdown" href="#" role="button">
+            <i class="fas fa-user-circle mr-1 text-primary"></i> <strong>${escapeHtml(user.nama)}</strong> <span class="badge badge-secondary ml-1">${user.role.toUpperCase()}</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-item disabled text-muted small py-1"><i class="fas fa-id-badge mr-1"></i> ${escapeHtml(user.username)}</div>
+            <div class="dropdown-divider"></div>
+            <a href="javascript:void(0)" onclick="logoutUser()" class="dropdown-item text-danger py-1"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+          </div>
+        </li>
+      `);
+    } else {
+      $('#navKelolaUser').hide();
+      nav.append(`
+        <li class="nav-item">
+          <a class="btn btn-outline-primary btn-sm my-1" href="index.html"><i class="fas fa-arrow-left mr-1"></i> Kembali ke Dashboard</a>
+        </li>
+      `);
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem('church_current_user');
+    window.location.href = 'login.html';
+  }
+
   $(document).ready(function() {
+    const rawUser = localStorage.getItem('church_current_user');
+    if (!rawUser) {
+      window.location.href = 'login.html';
+      return;
+    }
+    renderUserNav();
     // Initialize Tooltips with hover trigger & auto cleanup
     $('.tooltip').remove();
     $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });
@@ -464,8 +514,15 @@
 
       const schedules = getSchedules();
       const item = schedules.find(s => s.id === editId);
+      const currentUser = JSON.parse(localStorage.getItem('church_current_user') || 'null');
 
-      if (item) {
+      let canEdit = false;
+      if (currentUser) {
+        if (currentUser.role === 'dev') canEdit = true;
+        else if (item && item.createdBy && item.createdBy === currentUser.username) canEdit = true;
+      }
+
+      if (item && canEdit) {
         $('#jadwalId').val(item.id);
         $('#tanggalWaktu').val(item.tanggalWaktu);
         $('#sesiIbadah').val(item.sesiIbadah).trigger('change');
@@ -486,7 +543,7 @@
           addSongItem();
         }
       } else {
-        Toast.fire({ icon: 'error', title: 'Data tidak ditemukan!' });
+        Toast.fire({ icon: 'error', title: 'Akses ditolak atau data tidak ditemukan!' });
         setTimeout(() => window.location.href = 'index.html', 1500);
       }
     } else {
@@ -584,8 +641,8 @@
         return false;
       }
 
-      const id = $('#jadwalId').val();
-      const schedules = getSchedules();
+      const currentUser = JSON.parse(localStorage.getItem('church_current_user') || 'null');
+      const existingItem = id ? schedules.find(s => s.id === id) : null;
 
       const payload = {
         id: id ? id : 'jdw_' + Date.now(),
@@ -598,7 +655,8 @@
         bassist: $('#bassist').val(),
         drummer: $('#drummer').val(),
         soundman: $('#soundman').val(),
-        daftarLagu: songsList
+        daftarLagu: songsList,
+        createdBy: existingItem ? (existingItem.createdBy || 'system') : (currentUser ? currentUser.username : 'system')
       };
 
       if (id) {

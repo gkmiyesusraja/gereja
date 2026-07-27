@@ -1,0 +1,4 @@
+username,password,nama,role
+dev,dev123,Pengembang (Dev),dev
+admin,admin123,Admin Utama,admin
+user1,user123,Petugas User 1,user
