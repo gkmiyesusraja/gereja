@@ -129,9 +129,9 @@
                   <div class="invalid-feedback" id="err-worshipLeader" style="display:none;">* Worship Leader wajib diisi</div>
                 </div>
                 <div class="form-group col-md-6">
-                  <label for="singers">Singer(s) <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" id="singers" placeholder="Contoh: Ani, Budi, Cici">
-                  <div class="invalid-feedback" id="err-singers" style="display:none;">* Singer(s) wajib diisi</div>
+                  <label for="singers">Singer(s)</label>
+                  <select class="form-control" id="singers" multiple="multiple" style="width: 100%;">
+                  </select>
                 </div>
               </div>
 
@@ -495,6 +495,14 @@
       allowClear: true
     });
 
+    // Initialize Select2 Singers (Multiple Tags)
+    $('#singers').select2({
+      theme: 'bootstrap4',
+      placeholder: 'Pilih / ketik nama Singer (bisa lebih dari 1)',
+      tags: true,
+      tokenSeparators: [',', ';']
+    });
+
     // Auto-focus ke kolom pencarian Select2 saat dropdown dibuka
     $(document).on('select2:open', () => {
       const searchInput = document.querySelector('.select2-container--open .select2-search__field');
@@ -527,7 +535,19 @@
         $('#tanggalWaktu').val(item.tanggalWaktu);
         $('#sesiIbadah').val(item.sesiIbadah).trigger('change');
         $('#worshipLeader').val(item.worshipLeader);
-        $('#singers').val(item.singers);
+        if (item.singers) {
+          const singerList = typeof item.singers === 'string' 
+            ? item.singers.split(',').map(s => s.trim()).filter(Boolean) 
+            : (Array.isArray(item.singers) ? item.singers : []);
+          
+          singerList.forEach(name => {
+            if ($('#singers option[value="' + escapeHtml(name) + '"]').length === 0) {
+              const newOption = new Option(name, name, true, true);
+              $('#singers').append(newOption);
+            }
+          });
+          $('#singers').val(singerList).trigger('change');
+        }
         $('#keyboardist').val(item.keyboardist);
         $('#guitarist').val(item.guitarist);
         $('#bassist').val(item.bassist);
@@ -599,13 +619,6 @@
         isValid = false;
       }
 
-      const singers = $('#singers').val();
-      if (!singers || !singers.trim()) {
-        $('#singers').addClass('is-invalid');
-        $('#err-singers').show();
-        isValid = false;
-      }
-
       const soundman = $('#soundman').val();
       if (!soundman || !soundman.trim()) {
         $('#soundman').addClass('is-invalid');
@@ -643,13 +656,15 @@
 
       const currentUser = JSON.parse(localStorage.getItem('church_current_user') || 'null');
       const existingItem = id ? schedules.find(s => s.id === id) : null;
+      const rawSingers = $('#singers').val();
+      const singersStr = Array.isArray(rawSingers) ? rawSingers.join(', ') : (rawSingers || '');
 
       const payload = {
         id: id ? id : 'jdw_' + Date.now(),
         tanggalWaktu: $('#tanggalWaktu').val(),
         sesiIbadah: $('#sesiIbadah').val(),
         worshipLeader: $('#worshipLeader').val(),
-        singers: $('#singers').val(),
+        singers: singersStr,
         keyboardist: $('#keyboardist').val(),
         guitarist: $('#guitarist').val(),
         bassist: $('#bassist').val(),
