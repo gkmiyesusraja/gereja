@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Form Data Jemaat | GKMI Yesus Raja</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+  <!-- Select2 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
+  <!-- AdminLTE Theme -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <!-- SweetAlert2 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+  <style>
+    body { font-family: 'Source Sans Pro', sans-serif; }
+    .card-title { font-size: 1.15rem; }
+    .back-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1050;
+      display: none;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      text-align: center;
+      line-height: 42px;
+      padding: 0;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .select2-container--bootstrap4 .select2-selection--multiple {
+      min-height: 38px !important;
+      border: 1px solid #ced4da !important;
+      border-radius: 0.25rem !important;
+      padding: 2px 6px !important;
+      background-color: #fff !important;
+    }
+    .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+      background-color: #007bff !important;
+      border: none !important;
+      color: #ffffff !important;
+      padding: 3px 10px !important;
+      border-radius: 15px !important;
+      font-size: 0.85rem !important;
+      margin-top: 3px !important;
+      margin-bottom: 3px !important;
+      margin-right: 6px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      flex-direction: row-reverse !important;
+    }
+    .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove {
+      color: rgba(255, 255, 255, 0.85) !important;
+      margin-left: 6px !important;
+      background: transparent !important;
+      border: none !important;
+      font-weight: bold !important;
+      font-size: 14px !important;
+      cursor: pointer !important;
+    }
+  </style>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed layout-navbar-fixed">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand navbar-white navbar-light">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+      </li>
+    </ul>
+
+    <!-- Right navbar links -->
+    <ul class="navbar-nav ml-auto" id="userNavSection">
+    </ul>
+  </nav>
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <a href="index.html" class="brand-link">
+      <i class="fas fa-church brand-image img-circle elevation-3 p-2 bg-primary text-white" style="opacity: .8"></i>
+      <span class="brand-text font-weight-light">GKMI Yesus Raja</span>
+    </a>
+
+    <div class="sidebar">
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-header">MENU UTAMA</li>
+          <li class="nav-item">
+            <a href="index.html" class="nav-link">
+              <i class="nav-icon fas fa-calendar-alt"></i>
+              <p>Jadwal Musik</p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="jemaat.html" class="nav-link active">
+              <i class="nav-icon fas fa-user-friends"></i>
+              <p>Data Jemaat</p>
+            </a>
+          </li>
+          <li class="nav-item" id="navKelolaUser" style="display: none;">
+            <a href="users.html" class="nav-link">
+              <i class="nav-icon fas fa-users-cog"></i>
+              <p>Kelola User</p>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </aside>
+
+  <!-- Content Wrapper -->
+  <div class="content-wrapper">
+    <section class="content pt-3">
+      <div class="container-fluid">
+
+        <!-- Form Card -->
+        <div class="card card-primary card-outline">
+          <div class="card-header">
+            <h3 class="card-title" id="formTitle"><i class="fas fa-user-plus mr-2"></i>Tambah Data Jemaat</h3>
+          </div>
+
+          <form id="formJemaat" action="#" method="post">
+            <div class="card-body">
+              <input type="hidden" id="jemaatId">
+
+              <h6 class="font-weight-bold text-secondary mb-3">Informasi Pribadi & Pelayanan</h6>
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label for="nama">Nama Lengkap <span class="text-danger">*</span></label>
+                  <input type="text" id="nama" class="form-control" placeholder="cth: Yohanes Budi" required autocomplete="off">
+                  <div class="invalid-feedback">Nama lengkap wajib diisi!</div>
+                </div>
+
+                <div class="col-md-6 form-group">
+                  <label for="telepon">No. Telepon / WhatsApp</label>
+                  <input type="text" id="telepon" class="form-control" placeholder="cth: 081234567890">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="bidang">Pelayanan / Bidang Keterlibatan</label>
+                <select id="bidang" class="form-control" multiple="multiple" style="width: 100%;">
+                  <option value="Worship Leader">Worship Leader (WL)</option>
+                  <option value="Singer">Singer</option>
+                  <option value="Keyboard">Keyboard</option>
+                  <option value="Gitar">Gitar</option>
+                  <option value="Bass">Bass</option>
+                  <option value="Drum">Drum</option>
+                  <option value="Multimedia">Multimedia</option>
+                  <option value="Soundman">Soundman</option>
+                </select>
+              </div>
+
+              <hr class="mt-4 mb-3">
+              <h6 class="font-weight-bold text-secondary mb-3">Akun Login Pengguna</h6>
+
+              <div class="row">
+                <div class="col-md-6 form-group">
+                  <label for="username">Username Login <span class="text-danger">*</span></label>
+                  <input type="text" id="username" class="form-control" placeholder="cth: yohanes.budi" required autocomplete="off">
+                  <div class="invalid-feedback" id="err-username">Username wajib diisi!</div>
+                </div>
+
+                <div class="col-md-6 form-group">
+                  <label for="password">Password Login <span class="text-danger">*</span></label>
+                  <input type="password" id="password" class="form-control" value="123456" placeholder="Ketik password" required>
+                  <div class="invalid-feedback">Password wajib diisi!</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <a href="jemaat.html" class="btn btn-secondary btn-sm" data-toggle="tooltip" title="Kembali ke Daftar Jemaat">
+                <i class="fas fa-arrow-left"></i>
+              </a>
+              <button type="submit" class="btn btn-primary float-right" data-toggle="tooltip" title="Simpan Data Jemaat">
+                <i class="fas fa-save"></i>
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="float-right d-none d-sm-inline">
+      Aplikasi Pelayanan Musik
+    </div>
+    <strong>GKMI Yesus Raja &copy; 2026</strong>. All rights reserved.
+  </footer>
+
+  <!-- Back to Top Button -->
+  <a id="btnBackToTop" href="#" class="btn btn-primary back-to-top" role="button" data-toggle="tooltip" title="Kembali ke Atas">
+    <i class="fas fa-chevron-up"></i>
+  </a>
+</div>
+
+<!-- Scripts -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  const JEMAAT_KEY = 'church_jemaat_v1';
+  const USERS_KEY = 'church_users_v1';
+  const CURRENT_USER_KEY = 'church_current_user';
+  const GAS_URL_KEY = 'church_gas_web_app_url';
+
+  const DEFAULT_JEMAAT = [
+    { id: 'jem_1', nama: 'Budi Santoso', telepon: '08123456789', bidang: 'Worship Leader, Singer', username: 'budi.santoso' },
+    { id: 'jem_2', nama: 'Ani Wijaya', telepon: '08198765432', bidang: 'Singer', username: 'ani.wijaya' },
+    { id: 'jem_3', nama: 'Samuel Kristanto', telepon: '08133344455', bidang: 'Keyboard, Gitar', username: 'samuel.k' },
+    { id: 'jem_4', nama: 'Philip Susanto', telepon: '08155566677', bidang: 'Multimedia', username: 'philip.s' }
+  ];
+
+  const DEFAULT_USERS = [
+    { username: 'dev', password: 'dev123', nama: 'Pengembang (Dev)', role: 'dev' },
+    { username: 'admin', password: 'admin123', nama: 'Admin Utama', role: 'admin' },
+    { username: 'user1', password: 'user123', nama: 'Petugas User 1', role: 'user' }
+  ];
+
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true
+  });
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function getJemaat() {
+    const raw = localStorage.getItem(JEMAAT_KEY);
+    return raw ? JSON.parse(raw) : DEFAULT_JEMAAT;
+  }
+
+  function saveJemaat(data) {
+    localStorage.setItem(JEMAAT_KEY, JSON.stringify(data));
+  }
+
+  function getUsers() {
+    const raw = localStorage.getItem(USERS_KEY);
+    return raw ? JSON.parse(raw) : DEFAULT_USERS;
+  }
+
+  function saveUsers(users) {
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  }
+
+  function getCurrentUser() {
+    const raw = localStorage.getItem(CURRENT_USER_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }
+
+  function renderUserNav() {
+    const user = getCurrentUser();
+    const nav = $('#userNavSection');
+    nav.empty();
+
+    if (user) {
+      if (user.role === 'dev' || user.role === 'admin') {
+        $('#navKelolaUser').show();
+      } else {
+        $('#navKelolaUser').hide();
+      }
+
+      nav.append(`
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle text-dark font-weight-normal" data-toggle="dropdown" href="#" role="button">
+            <i class="fas fa-user-circle mr-1 text-primary"></i> <strong>${escapeHtml(user.nama)}</strong> <span class="badge badge-secondary ml-1">${user.role.toUpperCase()}</span>
+          </a>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-item disabled text-muted small py-1"><i class="fas fa-id-badge mr-1"></i> ${escapeHtml(user.username)}</div>
+            <div class="dropdown-divider"></div>
+            <a href="javascript:void(0)" onclick="logoutUser()" class="dropdown-item text-danger py-1"><i class="fas fa-sign-out-alt mr-2"></i> Logout</a>
+          </div>
+        </li>
+      `);
+    }
+  }
+
+  function logoutUser() {
+    localStorage.removeItem(CURRENT_USER_KEY);
+    window.location.href = 'login.html';
+  }
+
+  $(document).ready(function() {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      window.location.href = 'login.html';
+      return;
+    }
+
+    renderUserNav();
+
+    // Select2 bidang init
+    $('#bidang').select2({
+      theme: 'bootstrap4',
+      placeholder: 'Pilih bidang pelayanan',
+      tags: true
+    });
+
+    // Auto-generate username from name
+    $('#nama').on('input', function() {
+      const editId = $('#jemaatId').val();
+      if (!editId) {
+        const val = $(this).val().toLowerCase().trim().replace(/[^a-z0-9]/g, '.').replace(/\.+/g, '.');
+        $('#username').val(val);
+      }
+    });
+
+    // Edit mode
+    const params = new URLSearchParams(window.location.search);
+    const editId = params.get('id');
+
+    if (editId) {
+      $('#formTitle').html('<i class="fas fa-edit mr-2"></i>Edit Data Jemaat');
+      const jemaatList = getJemaat();
+      const item = jemaatList.find(x => x.id === editId);
+
+      if (item) {
+        $('#jemaatId').val(item.id);
+        $('#nama').val(item.nama);
+        $('#telepon').val(item.telepon);
+        $('#username').val(item.username);
+
+        if (item.bidang) {
+          const bidangArr = item.bidang.split(',').map(b => b.trim()).filter(Boolean);
+          bidangArr.forEach(b => {
+            if ($('#bidang option[value="' + escapeHtml(b) + '"]').length === 0) {
+              $('#bidang').append(new Option(b, b, true, true));
+            }
+          });
+          $('#bidang').val(bidangArr).trigger('change');
+        }
+      }
+    }
+
+    $('.tooltip').remove();
+    $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });
+
+    // Submit form
+    $('#formJemaat').on('submit', function(e) {
+      e.preventDefault();
+      $('.form-control').removeClass('is-invalid');
+
+      const id = $('#jemaatId').val();
+      const nama = $('#nama').val().trim();
+      const telepon = $('#telepon').val().trim();
+      const rawBidang = $('#bidang').val();
+      const bidangStr = Array.isArray(rawBidang) ? rawBidang.join(', ') : (rawBidang || '');
+      const u = $('#username').val().trim();
+      const p = $('#password').val().trim();
+
+      let isValid = true;
+      if (!nama) { $('#nama').addClass('is-invalid'); isValid = false; }
+      if (!u) { $('#username').addClass('is-invalid'); isValid = false; }
+      if (!p) { $('#password').addClass('is-invalid'); isValid = false; }
+
+      if (!isValid) return false;
+
+      const jemaatList = getJemaat();
+      // Check username collision on other jemaat
+      if (jemaatList.some(x => x.id !== id && x.username.toLowerCase() === u.toLowerCase())) {
+        $('#username').addClass('is-invalid');
+        Toast.fire({ icon: 'error', title: 'Username sudah digunakan oleh jemaat lain!' });
+        return false;
+      }
+
+      const payloadJemaat = {
+        id: id ? id : 'jem_' + Date.now(),
+        nama: nama,
+        telepon: telepon,
+        bidang: bidangStr,
+        username: u
+      };
+
+      if (id) {
+        const idx = jemaatList.findIndex(x => x.id === id);
+        if (idx !== -1) jemaatList[idx] = payloadJemaat;
+      } else {
+        jemaatList.push(payloadJemaat);
+      }
+      saveJemaat(jemaatList);
+
+      // Auto-create or update User account in church_users_v1
+      const users = getUsers();
+      const userIndex = users.findIndex(x => x.username.toLowerCase() === u.toLowerCase());
+      const payloadUser = { username: u, password: p, nama: nama, role: 'user' };
+
+      if (userIndex !== -1) {
+        users[userIndex].nama = nama;
+        users[userIndex].password = p;
+      } else {
+        users.push(payloadUser);
+      }
+      saveUsers(users);
+
+      // Sync with Google Sheet if configured
+      const gasUrl = localStorage.getItem(GAS_URL_KEY);
+      if (gasUrl) {
+        try {
+          fetch(gasUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'saveJemaat', data: payloadJemaat })
+          });
+          fetch(gasUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'saveUser', data: payloadUser })
+          });
+        } catch(err) {}
+      }
+
+      Toast.fire({ icon: 'success', title: 'Data jemaat & akun pengguna berhasil disimpan!' });
+      setTimeout(() => window.location.href = 'jemaat.html', 1200);
+    });
+
+    $(window).scroll(function() {
+      if ($(this).scrollTop() > 150) {
+        $('#btnBackToTop').fadeIn();
+      } else {
+        $('#btnBackToTop').fadeOut();
+      }
+    });
+
+    $('#btnBackToTop').click(function(e) {
+      e.preventDefault();
+      $('html, body').animate({ scrollTop: 0 }, 'fast');
+    });
+  });
+</script>
+</body>
+</html>

@@ -93,9 +93,15 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-header">MENU UTAMA</li>
           <li class="nav-item">
-            <a href="#" class="nav-link active">
+            <a href="index.html" class="nav-link active">
               <i class="nav-icon fas fa-calendar-alt"></i>
               <p>Jadwal Musik</p>
+            </a>
+          </li>
+          <li class="nav-item" id="navDataJemaat" style="display: none;">
+            <a href="jemaat.html" class="nav-link">
+              <i class="nav-icon fas fa-user-friends"></i>
+              <p>Data Jemaat</p>
             </a>
           </li>
           <li class="nav-item" id="navKelolaUser" style="display: none;">
@@ -349,8 +355,10 @@
       $('#btnAddJadwal').show();
       if (user.role === 'dev' || user.role === 'admin') {
         $('#navKelolaUser').show();
+        $('#navDataJemaat').show();
       } else {
         $('#navKelolaUser').hide();
+        $('#navDataJemaat').hide();
       }
 
       nav.append(`
@@ -847,6 +855,7 @@
             </div>
           </div>
         </div>
+        ${item.gambarFlyer ? `<div class="mb-3 text-center"><img src="${item.gambarFlyer}" alt="Flyer Jadwal" class="img-fluid rounded border shadow-sm" style="max-height: 350px; object-fit: contain;"></div>` : ''}
         ${songsHtml}
       </div>
     `;

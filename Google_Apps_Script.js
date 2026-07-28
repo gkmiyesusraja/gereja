@@ -1,9 +1,10 @@
 // =========================================================================
 // GOOGLE APPS SCRIPT FOR GKMI YESUS RAJA - JADWAL PELAYANAN MUSIK GEREJA
 // =========================================================================
-// Mendukung 2 Tab Sheet:
+// Mendukung 3 Tab Sheet:
 // 1. "JadwalMusik" (id, tanggalWaktu, sesiIbadah, worshipLeader, singers, keyboardist, guitarist, bassist, drummer, soundman, daftarLagu, createdBy)
 // 2. "Users" (username, password, nama, role)
+// 3. "Jemaat" (id, nama, telepon, bidang, username)
 // =========================================================================
 
 function doGet(e) {
@@ -24,6 +25,22 @@ function doGet(e) {
       users.push(u);
     }
     return jsonOutput(users);
+  }
+
+  if (action === 'getJemaat') {
+    var jemaatSheet = ss.getSheetByName("Jemaat");
+    if (!jemaatSheet) return jsonOutput([]);
+    var data = jemaatSheet.getDataRange().getValues();
+    if (data.length <= 1) return jsonOutput([]);
+    var headers = data[0];
+    var jemaatList = [];
+    for (var i = 1; i < data.length; i++) {
+      var row = data[i];
+      var jObj = {};
+      for (var j = 0; j < headers.length; j++) jObj[headers[j]] = row[j];
+      jemaatList.push(jObj);
+    }
+    return jsonOutput(jemaatList);
   }
   
   // Default: getSchedules
@@ -54,6 +71,42 @@ function doPost(e) {
   var contents = JSON.parse(e.postData.contents);
   var action = contents.action;
   
+  if (action === 'saveJemaat') {
+    var jSheet = ss.getSheetByName("Jemaat");
+    if (!jSheet) {
+      jSheet = ss.insertSheet("Jemaat");
+      jSheet.appendRow(["id", "nama", "telepon", "bidang", "username"]);
+    }
+    var jData = contents.data;
+    var data = jSheet.getDataRange().getValues();
+    var foundIndex = -1;
+    for (var i = 1; i < data.length; i++) {
+      if (data[i][0] === jData.id) {
+        foundIndex = i + 1;
+        break;
+      }
+    }
+    var jRow = [jData.id || '', jData.nama || '', jData.telepon || '', jData.bidang || '', jData.username || ''];
+    if (foundIndex > 0) jSheet.getRange(foundIndex, 1, 1, jRow.length).setValues([jRow]);
+    else jSheet.appendRow(jRow);
+    return jsonOutput({ status: 'success' });
+  }
+
+  if (action === 'deleteJemaat') {
+    var jSheet = ss.getSheetByName("Jemaat");
+    if (jSheet) {
+      var idToDelete = contents.id;
+      var data = jSheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0] === idToDelete) {
+          jSheet.deleteRow(i + 1);
+          break;
+        }
+      }
+    }
+    return jsonOutput({ status: 'success' });
+  }
+
   if (action === 'saveUser') {
     var userSheet = ss.getSheetByName("Users");
     if (!userSheet) {
@@ -94,7 +147,7 @@ function doPost(e) {
     var sheet = ss.getSheetByName("JadwalMusik");
     if (!sheet) {
       sheet = ss.insertSheet("JadwalMusik");
-      sheet.appendRow(["id", "tanggalWaktu", "sesiIbadah", "worshipLeader", "singers", "keyboardist", "guitarist", "bassist", "drummer", "soundman", "daftarLagu", "createdBy"]);
+      sheet.appendRow(["id", "tanggalWaktu", "sesiIbadah", "worshipLeader", "singers", "keyboardist", "guitarist", "bassist", "drummer", "soundman", "gambarFlyer", "daftarLagu", "createdBy"]);
     }
     var payload = contents.data;
     var data = sheet.getDataRange().getValues();
@@ -117,6 +170,7 @@ function doPost(e) {
       payload.bassist || '',
       payload.drummer || '',
       payload.soundman || '',
+      payload.gambarFlyer || '',
       payload.daftarLagu || '',
       payload.createdBy || ''
     ];

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kelola User | GKMI Yesus Raja</title>
+  <title>Data Jemaat | GKMI Yesus Raja</title>
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
@@ -69,14 +69,14 @@
               <p>Jadwal Musik</p>
             </a>
           </li>
-          <li class="nav-item" id="navDataJemaat">
-            <a href="jemaat.html" class="nav-link">
+          <li class="nav-item">
+            <a href="jemaat.html" class="nav-link active">
               <i class="nav-icon fas fa-user-friends"></i>
               <p>Data Jemaat</p>
             </a>
           </li>
-          <li class="nav-item">
-            <a href="users.html" class="nav-link active">
+          <li class="nav-item" id="navKelolaUser" style="display: none;">
+            <a href="users.html" class="nav-link">
               <i class="nav-icon fas fa-users-cog"></i>
               <p>Kelola User</p>
             </a>
@@ -95,11 +95,11 @@
         <div class="card card-primary card-outline">
           <div class="card-header border-0">
             <h3 class="card-title font-weight-bold d-flex align-items-center">
-              <span>Daftar Pengguna / User</span>
+              <span>Master Data Jemaat</span>
               <span id="syncStatus" class="ml-3 small text-muted font-weight-normal" style="display:none;"><i class="fas fa-sync-alt fa-spin text-primary mr-1"></i>Menyinkronkan...</span>
             </h3>
-            <div class="card-tools">
-              <a href="form-user.html" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Tambah User Baru">
+            <div class="card-tools" id="btnToolsSection" style="display:none;">
+              <a href="form-jemaat.html" class="btn btn-primary btn-sm" data-toggle="tooltip" title="Tambah Jemaat Baru">
                 <i class="fas fa-plus"></i>
               </a>
             </div>
@@ -107,16 +107,18 @@
 
           <div class="card-body">
             <div class="table-responsive">
-              <table id="tableUsers" class="table table-bordered table-striped table-hover w-100">
+              <table id="tableJemaat" class="table table-bordered table-striped table-hover w-100">
                 <thead>
                   <tr>
                     <th style="width: 5%">No</th>
-                    <th style="width: 25%">Username</th>
-                    <th style="width: 45%">Nama Lengkap</th>
-                    <th style="width: 25%">Role / Hak Akses</th>
+                    <th style="width: 25%">Nama Lengkap</th>
+                    <th style="width: 20%">No. Telepon / WA</th>
+                    <th style="width: 25%">Pelayanan / Bidang</th>
+                    <th style="width: 15%">Username Akun</th>
+                    <th style="width: 10%">Aksi</th>
                   </tr>
                 </thead>
-                <tbody id="tbodyUsers">
+                <tbody id="tbodyJemaat">
                   <!-- Data rendered via JS -->
                 </tbody>
               </table>
@@ -151,17 +153,18 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-  const USERS_KEY = 'church_users_v1';
+  const JEMAAT_KEY = 'church_jemaat_v1';
   const CURRENT_USER_KEY = 'church_current_user';
   const GAS_URL_KEY = 'church_gas_web_app_url';
 
-  const DEFAULT_USERS = [
-    { username: 'dev', password: 'dev123', nama: 'Pengembang (Dev)', role: 'dev' },
-    { username: 'admin', password: 'admin123', nama: 'Admin Utama', role: 'admin' },
-    { username: 'user1', password: 'user123', nama: 'Petugas User 1', role: 'user' }
+  const DEFAULT_JEMAAT = [
+    { id: 'jem_1', nama: 'Budi Santoso', telepon: '08123456789', bidang: 'Worship Leader, Singer', username: 'budi.santoso' },
+    { id: 'jem_2', nama: 'Ani Wijaya', telepon: '08198765432', bidang: 'Singer', username: 'ani.wijaya' },
+    { id: 'jem_3', nama: 'Samuel Kristanto', telepon: '08133344455', bidang: 'Keyboard, Gitar', username: 'samuel.k' },
+    { id: 'jem_4', nama: 'Philip Susanto', telepon: '08155566677', bidang: 'Multimedia', username: 'philip.s' }
   ];
 
-  let dataTableUsersInstance = null;
+  let dataTableJemaatInstance = null;
 
   const Toast = Swal.mixin({
     toast: true,
@@ -181,13 +184,13 @@
       .replace(/'/g, '&#039;');
   }
 
-  function getUsers() {
-    const raw = localStorage.getItem(USERS_KEY);
-    return raw ? JSON.parse(raw) : DEFAULT_USERS;
+  function getJemaat() {
+    const raw = localStorage.getItem(JEMAAT_KEY);
+    return raw ? JSON.parse(raw) : DEFAULT_JEMAAT;
   }
 
-  function saveUsers(users) {
-    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  function saveJemaat(data) {
+    localStorage.setItem(JEMAAT_KEY, JSON.stringify(data));
   }
 
   function getCurrentUser() {
@@ -205,6 +208,14 @@
     nav.empty();
 
     if (user) {
+      if (user.role === 'dev' || user.role === 'admin') {
+        $('#navKelolaUser').show();
+        $('#btnToolsSection').show();
+      } else {
+        $('#navKelolaUser').hide();
+        $('#btnToolsSection').show(); // all logged in users can add jemaat
+      }
+
       nav.append(`
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle text-dark font-weight-normal" data-toggle="dropdown" href="#" role="button">
@@ -217,6 +228,8 @@
           </div>
         </li>
       `);
+    } else {
+      $('#btnToolsSection').hide();
     }
   }
 
@@ -225,32 +238,50 @@
     window.location.href = 'login.html';
   }
 
-  function renderTableUsers(users) {
-    if (!users) users = [];
-    if (dataTableUsersInstance) dataTableUsersInstance.destroy();
+  function renderTableJemaat(jemaatList) {
+    if (!jemaatList) jemaatList = [];
+    if (dataTableJemaatInstance) dataTableJemaatInstance.destroy();
 
-    const tbody = $('#tbodyUsers');
+    const currentUser = getCurrentUser();
+    const canManage = currentUser && (currentUser.role === 'dev' || currentUser.role === 'admin');
+
+    const tbody = $('#tbodyJemaat');
     tbody.empty();
 
-    users.forEach((u, index) => {
-      let roleBadge = u.role === 'dev' ? 'badge-danger' : (u.role === 'admin' ? 'badge-primary' : 'badge-secondary');
+    jemaatList.forEach((j, index) => {
+      let bidangBadges = '-';
+      if (j.bidang) {
+        bidangBadges = j.bidang.split(',').map(b => `<span class="badge badge-info mr-1">${escapeHtml(b.trim())}</span>`).join('');
+      }
+
+      let btnActions = `
+        <a href="form-jemaat.html?id=${j.id}" class="btn btn-xs btn-warning text-white mr-1" data-toggle="tooltip" title="Edit Jemaat"><i class="fas fa-edit"></i></a>
+      `;
+      if (canManage) {
+        btnActions += `
+          <button type="button" class="btn btn-xs btn-danger" onclick="deleteJemaat('${j.id}')" data-toggle="tooltip" title="Hapus Jemaat"><i class="fas fa-trash"></i></button>
+        `;
+      }
+
       const rowHtml = `
         <tr>
           <td class="text-center">${index + 1}</td>
-          <td><strong>${escapeHtml(u.username)}</strong></td>
-          <td>${escapeHtml(u.nama)}</td>
-          <td><span class="badge ${roleBadge} px-2 py-1">${u.role.toUpperCase()}</span></td>
+          <td><strong>${escapeHtml(j.nama)}</strong></td>
+          <td>${escapeHtml(j.telepon || '-')}</td>
+          <td>${bidangBadges}</td>
+          <td><code>${escapeHtml(j.username || '-')}</code></td>
+          <td class="text-center" style="white-space: nowrap;">${btnActions}</td>
         </tr>
       `;
       tbody.append(rowHtml);
     });
 
-    dataTableUsersInstance = $('#tableUsers').DataTable({
+    dataTableJemaatInstance = $('#tableJemaat').DataTable({
       responsive: true,
       autoWidth: false,
       language: {
         url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/id.json',
-        emptyTable: "Belum ada user tersimpan."
+        emptyTable: "Belum ada data jemaat tersimpan."
       }
     });
 
@@ -258,96 +289,46 @@
     $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });
   }
 
-  async function loadUsersFromBackend() {
-    const localUsers = getUsers();
-    renderTableUsers(localUsers);
+  async function loadJemaatFromBackend() {
+    const localData = getJemaat();
+    renderTableJemaat(localData);
 
     const gasUrl = getGasUrl();
     if (gasUrl) {
       $('#syncStatus').show();
       try {
-        const res = await fetch(gasUrl + '?action=getUsers');
+        const res = await fetch(gasUrl + '?action=getJemaat');
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            saveUsers(data);
-            renderTableUsers(data);
+            saveJemaat(data);
+            renderTableJemaat(data);
           }
         }
       } catch (err) {
-        console.warn('Gagal sync Users dari Google Sheet:', err);
+        console.warn('Gagal sync Jemaat dari Google Sheet:', err);
       } finally {
         $('#syncStatus').fadeOut('fast');
       }
     }
   }
 
-  function addNewUserForm() {
-    const currentUser = getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'dev' && currentUser.role !== 'admin')) return;
-
-    let roleOptions = `<option value="user">User Biasa</option>`;
-    if (currentUser.role === 'dev') {
-      roleOptions = `<option value="user">User Biasa</option><option value="admin">Admin</option><option value="dev">Developer</option>`;
-    }
-
+  function deleteJemaat(id) {
     Swal.fire({
-      title: 'Tambah User Baru',
-      html: `
-        <div class="text-left px-2">
-          <div class="form-group mb-2">
-            <label class="small text-muted mb-1">Username</label>
-            <input type="text" id="newUsername" class="form-control" placeholder="cth: pelayan1">
-          </div>
-          <div class="form-group mb-2">
-            <label class="small text-muted mb-1">Password</label>
-            <input type="password" id="newPassword" class="form-control" placeholder="Password">
-          </div>
-          <div class="form-group mb-2">
-            <label class="small text-muted mb-1">Nama Lengkap</label>
-            <input type="text" id="newNama" class="form-control" placeholder="cth: Yohanes Budi">
-          </div>
-          <div class="form-group mb-2">
-            <label class="small text-muted mb-1">Role / Hak Akses</label>
-            <select id="newRole" class="form-control">
-              ${roleOptions}
-            </select>
-          </div>
-        </div>
-      `,
+      title: 'Hapus Data Jemaat?',
+      text: "Data jemaat yang dihapus tidak dapat dikembalikan.",
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: 'Simpan User',
-      cancelButtonText: 'Batal',
-      allowOutsideClick: false,
-      didOpen: () => {
-        $('.swal2-close').attr('data-toggle', 'tooltip').attr('title', 'Tutup Detail').tooltip({ trigger: 'hover' });
-      },
-      preConfirm: () => {
-        const u = $('#newUsername').val().trim();
-        const p = $('#newPassword').val().trim();
-        const n = $('#newNama').val().trim();
-        const r = $('#newRole').val();
-
-        if (!u || !p || !n) {
-          Swal.showValidationMessage('Semua kolom wajib diisi!');
-          return false;
-        }
-
-        const users = getUsers();
-        if (users.some(x => x.username.toLowerCase() === u.toLowerCase())) {
-          Swal.showValidationMessage('Username sudah digunakan!');
-          return false;
-        }
-
-        return { username: u, password: p, nama: n, role: r };
-      }
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Ya, Hapus!',
+      cancelButtonText: 'Batal'
     }).then(async (result) => {
-      if (result.isConfirmed && result.value) {
-        const users = getUsers();
-        users.push(result.value);
-        saveUsers(users);
+      if (result.isConfirmed) {
+        let jemaatList = getJemaat();
+        jemaatList = jemaatList.filter(x => x.id !== id);
+        saveJemaat(jemaatList);
 
-        // Sync to Google Sheet
         const gasUrl = getGasUrl();
         if (gasUrl) {
           try {
@@ -355,27 +336,26 @@
               method: 'POST',
               mode: 'no-cors',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'saveUser', data: result.value })
+              body: JSON.stringify({ action: 'deleteJemaat', id: id })
             });
           } catch(e) {}
         }
 
-        Toast.fire({ icon: 'success', title: 'User baru berhasil ditambahkan!' });
-        renderTableUsers(users);
+        Toast.fire({ icon: 'success', title: 'Data jemaat berhasil dihapus.' });
+        renderTableJemaat(jemaatList);
       }
     });
   }
 
   $(document).ready(function() {
     const currentUser = getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'dev' && currentUser.role !== 'admin')) {
-      alert('Akses ditolak. Halaman ini hanya untuk Admin & Dev.');
-      window.location.href = 'index.html';
+    if (!currentUser) {
+      window.location.href = 'login.html';
       return;
     }
 
     renderUserNav();
-    loadUsersFromBackend();
+    loadJemaatFromBackend();
 
     $('.tooltip').remove();
     $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });

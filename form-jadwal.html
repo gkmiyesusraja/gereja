@@ -12,7 +12,7 @@
   <!-- SweetAlert2 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
   <!-- Select2 CSS & Bootstrap 4 Theme -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css">
   <!-- Summernote WYSIWYG CSS -->
   <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
@@ -41,37 +41,32 @@
       margin-bottom: 2px !important;
       line-height: 1.4 !important;
     }
-    /* Select2 Bootstrap 4 Multiple Styling Fix */
-    .select2-container--bootstrap4 .select2-selection--multiple {
-      min-height: 38px !important;
-      border: 1px solid #ced4da !important;
-      border-radius: 0.25rem !important;
-      padding: 3px 6px !important;
-      background-color: #fff !important;
+    /* Select2 z-index fix for AdminLTE 3 */
+    .select2-container--open {
+      z-index: 999999 !important;
     }
-    .select2-container--bootstrap4 .select2-selection--multiple .select2-search__field {
-      margin-top: 2px !important;
-      font-size: 0.95rem !important;
-      line-height: 1.5 !important;
-      height: 26px !important;
+    .select2-dropdown {
+      z-index: 999999 !important;
     }
+    /* Select2 Bootstrap 4 Choice Pill Styling */
     .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
       background-color: #007bff !important;
       border: 1px solid #0062cc !important;
       color: #fff !important;
+      border-radius: 12px !important;
       padding: 2px 8px !important;
-      border-radius: 4px !important;
-      font-size: 0.875rem !important;
+      font-size: 0.85rem !important;
       margin-top: 2px !important;
+      margin-bottom: 2px !important;
       margin-right: 4px !important;
     }
     .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove {
-      color: #fff !important;
-      margin-right: 5px !important;
-      font-weight: bold;
+      color: rgba(255, 255, 255, 0.9) !important;
+      margin-right: 4px !important;
+      font-weight: bold !important;
     }
     .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice__remove:hover {
-      color: #ffc107 !important;
+      color: #ff4d4d !important;
     }
   </style>
 </head>
@@ -103,6 +98,12 @@
             <a href="index.html" class="nav-link active">
               <i class="nav-icon fas fa-calendar-alt"></i>
               <p>Jadwal Musik</p>
+            </a>
+          </li>
+          <li class="nav-item" id="navDataJemaat" style="display: none;">
+            <a href="jemaat.html" class="nav-link">
+              <i class="nav-icon fas fa-user-friends"></i>
+              <p>Data Jemaat</p>
             </a>
           </li>
           <li class="nav-item" id="navKelolaUser" style="display: none;">
@@ -157,13 +158,12 @@
               <div class="form-row">
                 <div class="form-group col-md-6">
                   <label for="worshipLeader">Worship Leader (WL) <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" id="worshipLeader" placeholder="Nama WL">
-                  <div class="invalid-feedback" id="err-worshipLeader" style="display:none;">* Worship Leader wajib diisi</div>
+                  <select class="form-control" id="worshipLeader" style="width: 100%;"></select>
+                  <div class="invalid-feedback" id="err-worshipLeader" style="display:none;">* Worship Leader wajib dipilih/diisi</div>
                 </div>
                 <div class="form-group col-md-6">
                   <label for="singers">Singer(s)</label>
-                  <select class="form-control" id="singers" multiple="multiple" style="width: 100%;">
-                  </select>
+                  <select class="form-control" id="singers" multiple="multiple" style="width: 100%;"></select>
                 </div>
               </div>
 
@@ -172,26 +172,39 @@
               <div class="form-row">
                 <div class="form-group col-md-4">
                   <label for="keyboardist">Keyboard</label>
-                  <input type="text" class="form-control" id="keyboardist" placeholder="Nama Pemain Keyboard">
+                  <select class="form-control" id="keyboardist" style="width: 100%;"></select>
                 </div>
                 <div class="form-group col-md-4">
                   <label for="guitarist">Gitaris</label>
-                  <input type="text" class="form-control" id="guitarist" placeholder="Nama Pemain Gitar">
+                  <select class="form-control" id="guitarist" style="width: 100%;"></select>
                 </div>
                 <div class="form-group col-md-4">
                   <label for="bassist">Bassist</label>
-                  <input type="text" class="form-control" id="bassist" placeholder="Nama Pemain Bass">
+                  <select class="form-control" id="bassist" style="width: 100%;"></select>
                 </div>
               </div>
               <div class="form-row">
                 <div class="form-group col-md-6">
                   <label for="drummer">Drummer</label>
-                  <input type="text" class="form-control" id="drummer" placeholder="Nama Drummer">
+                  <select class="form-control" id="drummer" style="width: 100%;"></select>
                 </div>
                 <div class="form-group col-md-6">
-                  <label for="soundman">Multimedia <span class="text-danger">*</span></label>
-                  <input type="text" class="form-control" id="soundman" placeholder="Nama Operator">
-                  <div class="invalid-feedback" id="err-soundman" style="display:none;">* Multimedia wajib diisi</div>
+                  <label for="soundman">Multimedia</label>
+                  <select class="form-control" id="soundman" style="width: 100%;"></select>
+                </div>
+              </div>
+
+              <hr>
+              <h6 class="font-weight-bold text-secondary mb-3">Lampiran Gambar / Banner (Opsional)</h6>
+              <div class="form-group">
+                <div class="custom-file">
+                  <input type="file" class="custom-file-input" id="gambarFlyer" accept="image/*">
+                  <label class="custom-file-label" for="gambarFlyer">Pilih Gambar / Flyer Jadwal (Opsional)...</label>
+                </div>
+                <small class="form-text text-muted">Format yang didukung: JPG, PNG, GIF, WEBP.</small>
+                <div id="gambarPreviewContainer" class="mt-2 align-items-center" style="display:none;">
+                  <img id="gambarPreview" src="" alt="Preview Gambar" class="img-thumbnail" style="max-height: 180px; object-fit: cover;">
+                  <button type="button" class="btn btn-sm btn-outline-danger ml-3" onclick="clearGambarPreview()"><i class="fas fa-trash mr-1"></i> Hapus Gambar</button>
                 </div>
               </div>
 
@@ -244,7 +257,7 @@
 <!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <!-- Select2 JS -->
-<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 <!-- Summernote WYSIWYG JS -->
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.js"></script>
 <!-- AdminLTE App -->
@@ -459,8 +472,10 @@
     if (user) {
       if (user.role === 'dev' || user.role === 'admin') {
         $('#navKelolaUser').show();
+        $('#navDataJemaat').show();
       } else {
         $('#navKelolaUser').hide();
+        $('#navDataJemaat').hide();
       }
 
       nav.append(`
@@ -490,6 +505,16 @@
     window.location.href = 'login.html';
   }
 
+  let currentGambarBase64 = '';
+
+  function clearGambarPreview() {
+    $('#gambarFlyer').val('');
+    $('.custom-file-label').text('Pilih Gambar / Flyer Jadwal (Opsional)...');
+    $('#gambarPreview').attr('src', '');
+    $('#gambarPreviewContainer').hide();
+    currentGambarBase64 = '';
+  }
+
   $(document).ready(function() {
     const rawUser = localStorage.getItem('church_current_user');
     if (!rawUser) {
@@ -497,6 +522,21 @@
       return;
     }
     renderUserNav();
+
+    // Image file change handler
+    $('#gambarFlyer').on('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        $('.custom-file-label').text(file.name);
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          $('#gambarPreview').attr('src', evt.target.result);
+          $('#gambarPreviewContainer').css('display', 'flex');
+          currentGambarBase64 = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
     // Initialize Tooltips with hover trigger & auto cleanup
     $('.tooltip').remove();
     $('[data-toggle="tooltip"]').tooltip({ trigger: 'hover' });
@@ -520,27 +560,70 @@
       $('html, body').animate({ scrollTop: 0 }, 'fast');
     });
 
-    // Initialize Select2
+    // Initialize Select2 Sesi Ibadah
     $('.select2').select2({
       theme: 'bootstrap4',
       placeholder: 'Pilih Sesi Ibadah',
       allowClear: true
     });
 
-    // Initialize Select2 Singers (Multiple Tags)
-    $('#singers').select2({
-      theme: 'bootstrap4',
-      placeholder: 'Contoh: Ani, Budi, Cici',
-      tags: true,
-      tokenSeparators: [',', ';']
+    // Populate Master Jemaat Options into Select2 dropdowns via Select2 Data API
+    const rawJemaat = localStorage.getItem('church_jemaat_v1');
+    const jemaatList = rawJemaat ? JSON.parse(rawJemaat) : [
+      { nama: 'Budi Santoso' },
+      { nama: 'Ani Wijaya' },
+      { nama: 'Samuel Kristanto' },
+      { nama: 'Philip Susanto' }
+    ];
+
+    const jemaatDataOptions = jemaatList.filter(j => j.nama).map(j => ({ id: j.nama, text: j.nama }));
+
+    const singleSelects = ['#worshipLeader', '#keyboardist', '#guitarist', '#bassist', '#drummer', '#soundman'];
+    singleSelects.forEach(selector => {
+      const el = $(selector);
+      el.empty().append('<option value="">-- Pilih / Ketik Nama --</option>');
+      jemaatList.forEach(j => {
+        if (j.nama) {
+          el.append(new Option(j.nama, j.nama, false, false));
+        }
+      });
+      el.select2({
+        theme: 'bootstrap4',
+        placeholder: 'Pilih / ketik nama...',
+        allowClear: true,
+        tags: true,
+        width: '100%',
+        dropdownParent: $(document.body)
+      });
     });
 
-    // Auto-focus ke kolom pencarian Select2 saat dropdown dibuka
-    $(document).on('select2:open', () => {
-      const searchInput = document.querySelector('.select2-container--open .select2-search__field');
-      if (searchInput) {
-        searchInput.focus();
+    // Initialize Select2 Singers (Multiple Tags from Master Jemaat)
+    const singersEl = $('#singers');
+    singersEl.empty();
+    jemaatList.forEach(j => {
+      if (j.nama) {
+        singersEl.append(new Option(j.nama, j.nama, false, false));
       }
+    });
+    singersEl.select2({
+      theme: 'bootstrap4',
+      placeholder: 'Pilih / ketik nama singer...',
+      tags: true,
+      width: '100%',
+      dropdownParent: $(document.body)
+    });
+
+    // Auto-update Select2 UI instantly on click without needing to type space
+    $('#singers').on('select2:select select2:unselect', function() {
+      $(this).trigger('change');
+      const s2 = $(this).data('select2');
+      if (s2 && s2.$selection) {
+        s2.$selection.find('.select2-search__field').val('');
+      }
+    });
+
+    $('#worshipLeader, #keyboardist, #guitarist, #bassist, #drummer, #soundman').on('select2:select select2:unselect', function() {
+      $(this).trigger('change');
     });
 
     // Check if editing (URL has ?id=xxx)
@@ -566,7 +649,16 @@
         $('#jadwalId').val(item.id);
         $('#tanggalWaktu').val(item.tanggalWaktu);
         $('#sesiIbadah').val(item.sesiIbadah).trigger('change');
-        $('#worshipLeader').val(item.worshipLeader);
+        function setSelectVal(selector, val) {
+          if (!val) return;
+          const el = $(selector);
+          if (el.find('option[value="' + escapeHtml(val) + '"]').length === 0) {
+            el.append(new Option(val, val, true, true));
+          }
+          el.val(val).trigger('change');
+        }
+
+        setSelectVal('#worshipLeader', item.worshipLeader);
         if (item.singers) {
           const singerList = typeof item.singers === 'string' 
             ? item.singers.split(',').map(s => s.trim()).filter(Boolean) 
@@ -580,11 +672,18 @@
           });
           $('#singers').val(singerList).trigger('change');
         }
-        $('#keyboardist').val(item.keyboardist);
-        $('#guitarist').val(item.guitarist);
-        $('#bassist').val(item.bassist);
-        $('#drummer').val(item.drummer);
-        $('#soundman').val(item.soundman);
+        setSelectVal('#keyboardist', item.keyboardist);
+        setSelectVal('#guitarist', item.guitarist);
+        setSelectVal('#bassist', item.bassist);
+        setSelectVal('#drummer', item.drummer);
+        setSelectVal('#soundman', item.soundman);
+
+        if (item.gambarFlyer) {
+          currentGambarBase64 = item.gambarFlyer;
+          $('#gambarPreview').attr('src', item.gambarFlyer);
+          $('#gambarPreviewContainer').css('display', 'flex');
+          $('.custom-file-label').text('Gambar Tersimpan');
+        }
 
         // Load songs
         if (Array.isArray(item.daftarLagu) && item.daftarLagu.length > 0) {
@@ -651,13 +750,6 @@
         isValid = false;
       }
 
-      const soundman = $('#soundman').val();
-      if (!soundman || !soundman.trim()) {
-        $('#soundman').addClass('is-invalid');
-        $('#err-soundman').show();
-        isValid = false;
-      }
-
       // Collect & validate songs
       const songsList = [];
       $('.song-item').each(function() {
@@ -686,6 +778,8 @@
         return false;
       }
 
+      const id = $('#jadwalId').val();
+      const schedules = getSchedules();
       const currentUser = JSON.parse(localStorage.getItem('church_current_user') || 'null');
       const existingItem = id ? schedules.find(s => s.id === id) : null;
       const rawSingers = $('#singers').val();
@@ -702,6 +796,7 @@
         bassist: $('#bassist').val(),
         drummer: $('#drummer').val(),
         soundman: $('#soundman').val(),
+        gambarFlyer: currentGambarBase64 || '',
         daftarLagu: songsList,
         createdBy: existingItem ? (existingItem.createdBy || 'system') : (currentUser ? currentUser.username : 'system')
       };
